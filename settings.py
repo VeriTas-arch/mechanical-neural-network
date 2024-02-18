@@ -4,8 +4,8 @@ class Settings:
     def __init__(self):
         """initilize the settings of the stimulation environment"""
         # screen settings
-        self.screen_width = 1080
-        self.screen_height = 720
+        self.screen_width = 960
+        self.screen_height = 640
         self.fps = 30
         self.bg_color = (230, 230, 230)
         self.gravity = (0, 0)
