@@ -9,3 +9,15 @@ class Settings:
         self.fps = 60
         self.bg_color = (230, 230, 230)
         self.gravity = (0, 0)
+
+        # opearation settings
+        self.arrow_color = (255, 0, 0)
+        self.arrow_thickness = 5
+        self.arrow_head_length = 10 
+        self.arrow_head_width = 8
+
+        # beam settings
+        self.damping = 10
+
+        # node settings
+        self.float_node_color = (0, 0, 255, 100)
