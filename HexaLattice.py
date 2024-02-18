@@ -21,7 +21,7 @@ class HexaLattice:
         self.settings = Settings()
         self.screen = pygame.display.set_mode(
             (self.settings.screen_width, self.settings.screen_height))
-        pygame.display.set_caption("HexaLattice")
+        pygame.display.set_caption("Mechanical Neural Network")
 
         # initialize pymunk
         self.space = pymunk.Space()
@@ -37,6 +37,8 @@ class HexaLattice:
         self.node_list = []
         self.init_pos = []
         self.length = self.settings.length
+        self.row_lenh = self.settings.row_lenh
+        self.row_num = self.settings.row_num
 
         # create the nodes and beams
         self._create_nodes(self.space)
@@ -83,20 +85,21 @@ class HexaLattice:
     # function that initializes the beams
     def _create_beams(self):
         length = self.length
+        n = self.row_lenh
         notion_mat = np.zeros((length, length))
 
         for i in range(length):
-            for j in range(i+1, length):
-                if i % 5 != 2 and i % 5 != 4:
-                    if j == i + 2 or j == i + 3 or j == i + 5:
+            for j in range(i + 1, length):
+                if i % (2 * n + 1) != n and i % (2 * n + 1) != 2 * n:
+                    if j == i + n or j == i + n + 1 or j == i + 2 * n + 1:
                         notion_mat[i][j] = 1
                         self.beam.add_beam(self.node_list[i], self.node_list[j], 10)
 
-                elif i % 5 == 2 and j == i + 3:
+                elif i % (2 * n + 1) == n and j == i + n + 1:
                     notion_mat[i][j] = 1
                     self.beam.add_beam(self.node_list[i], self.node_list[j], 10)
 
-                elif i % 5 == 4 and j == i + 2:
+                elif i % (2 * n + 1) == 2*n and j == i + n:
                     notion_mat[i][j] = 1
                     self.beam.add_beam(self.node_list[i], self.node_list[j], 10)
 
@@ -105,30 +108,37 @@ class HexaLattice:
 
     # function that initializes the nodes
     def _create_nodes(self, space):
-        # calculate the position bias of the nodes, note that the size of the screen is not called automatically
-        sep_h = (self.settings.screen_height - self.settings.beam_length) / 2
-        sep_w = (self.settings.screen_width - 4 * self.settings.beam_length * math.sin(math.pi/3)) / 2
+        sep_x = (self.settings.screen_width - (self.row_lenh - 1) * 100 * math.sqrt(3))/2
+        sep_y = (self.settings.screen_height - ((self.row_num - 1)/2) * 100)/2
+
+        n = self.row_lenh
+        T = 2 * n + 1
+        column_counter = 0
+        row_counter = 0
 
         for i in range(0, self.length):
-            if i % 5 == 0 or i % 5 == 1:
-                pos_x = sep_w + 100 * math.sin(math.pi/3) + (i % 5) * 2 * 100 * math.sin(math.pi/3)
-                pos_y = sep_h - 100 * math.cos(math.pi/3) + 100 * (i - i % 5) / 5
+            if column_counter == n:
+                row_counter += 1
 
-                self.node_list.append(self.node.add_float_node(space, 20, 10, (pos_x, pos_y)))
-                self.init_pos.append((pos_x, pos_y))
+            if column_counter == T:
+                column_counter = 0
+                row_counter += 1
 
-            elif i % 5 == 3:
-                pos_x = sep_w + 2 * 100 * math.sin(math.pi/3)
-                pos_y = sep_h + 100 * (i - 3) / 5
+            if column_counter < n:
+                pos_x = sep_x + column_counter * 100 * math.sqrt(3)
+                pos_y = sep_y + row_counter * 50
+                
+            if column_counter >= n and column_counter < T:
+                pos_x = sep_x + (column_counter - n) * 100 * math.sqrt(3) - 50 * math.sqrt(3)
+                pos_y = sep_y + row_counter * 50
+            column_counter += 1
 
-                self.node_list.append(self.node.add_float_node(space, 20, 10, (pos_x, pos_y)))
-                self.init_pos.append((pos_x, pos_y))
-
-            elif i % 5 == 2 or i % 5 == 4:
-                pos_x = sep_w + (i % 5 - 2) * 2 * 100 * math.sin(math.pi/3)
-                pos_y = sep_h + 100 * (i - i % 5) / 5
-
+            if (i + 1) % T == 0 or (i + 1) % T == self.row_lenh + 1:
                 self.node_list.append(self.node.add_static_node(space, 20, (pos_x, pos_y)))
+                self.init_pos.append((pos_x, pos_y))
+
+            else:
+                self.node_list.append(self.node.add_float_node(space, 20, 10, (pos_x, pos_y)))
                 self.init_pos.append((pos_x, pos_y))
 
 

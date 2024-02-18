@@ -4,7 +4,6 @@ import pymunk.pygame_util
 
 class Beam:
     """class for creating beams in the simulation"""
-
     def __init__(self, me_network):
         self.space = me_network.space
         self.settings = me_network.settings
