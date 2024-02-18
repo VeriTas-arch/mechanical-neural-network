@@ -32,7 +32,7 @@ class HexaLattice:
 
         self.node_list = []
         self.init_pos = []
-        self.length = 12
+        self.length = self.settings.length
 
         self._create_nodes(self.space)
         self._create_beams()
@@ -61,8 +61,8 @@ class HexaLattice:
         # apply force to the nodes
         body_1 = self.node_list[0]
         body_2 = self.node_list[1]
-        (F1_x , F1_y) = (60, 80)
-        (F2_x , F2_y) = (0, 100)
+        (F1_x , F1_y) = self.settings.force_1
+        (F2_x , F2_y) = self.settings.force_2
         self.operations.add_force(body_1, F1_x, F1_y)
         self.operations.add_force(body_2, F2_x, F2_y)
 
@@ -100,8 +100,8 @@ class HexaLattice:
     # function that initializes the nodes
     def _create_nodes(self, space):
         # calculate the position bias of the nodes, note that the size of the screen is not called automatically
-        sep_h = (720 - 100) / 2
-        sep_w = (1080 - 4 * 100 * math.sin(math.pi/3)) / 2
+        sep_h = (self.settings.screen_height - self.settings.beam_length) / 2
+        sep_w = (self.settings.screen_width - 4 * self.settings.beam_length * math.sin(math.pi/3)) / 2
 
         for i in range(0,12):
             if i%5 == 0 or i%5 == 1:
