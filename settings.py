@@ -33,3 +33,5 @@ class Settings:
 
         # node settings
         self.float_node_color = (0, 0, 255, 100)
+        self.node_radius = 20
+        self.float_node_mass = 10

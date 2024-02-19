@@ -109,6 +109,9 @@ class HexaLattice:
     # function that initializes the nodes
     def _create_nodes(self, space):
         blen = self.settings.beam_length
+        radius = self.settings.node_radius
+        mass = self.settings.float_node_mass
+        
         sep_x = (self.settings.screen_width - (self.row_lenh - 1) * blen * math.sqrt(3))/2
         sep_y = (self.settings.screen_height - ((self.row_num - 1)/2) * blen)/2
 
@@ -135,11 +138,11 @@ class HexaLattice:
             column_counter += 1
 
             if (i + 1) % T == 0 or (i + 1) % T == self.row_lenh + 1:
-                self.node_list.append(self.node.add_static_node(space, 20, (pos_x, pos_y)))
+                self.node_list.append(self.node.add_static_node(space, radius, (pos_x, pos_y)))
                 self.init_pos.append((pos_x, pos_y))
 
             else:
-                self.node_list.append(self.node.add_float_node(space, 20, 10, (pos_x, pos_y)))
+                self.node_list.append(self.node.add_float_node(space, radius, mass, (pos_x, pos_y)))
                 self.init_pos.append((pos_x, pos_y))
 
 
