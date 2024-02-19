@@ -10,8 +10,12 @@ class Settings:
         self.bg_color = (230, 230, 230)
         self.gravity = (0, 0)
 
+        # the number of the first row
+        self.row_lenh = 4
+        # row_num should be an odd number
+        self.row_num = 11
         # the length of the node list
-        self.length = 12
+        self.length = int((2 * self.row_lenh + 1) * (self.row_num - 1)/2 + self.row_lenh)
 
         # force settings
         self.force_1 = (60, 80)
@@ -29,3 +33,5 @@ class Settings:
 
         # node settings
         self.float_node_color = (0, 0, 255, 100)
+        self.node_radius = 20
+        self.float_node_mass = 10
