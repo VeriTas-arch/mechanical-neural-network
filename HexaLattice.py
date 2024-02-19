@@ -93,15 +93,15 @@ class HexaLattice:
                 if i % (2 * n + 1) != n and i % (2 * n + 1) != 2 * n:
                     if j == i + n or j == i + n + 1 or j == i + 2 * n + 1:
                         notion_mat[i][j] = 1
-                        self.beam.add_beam(self.node_list[i], self.node_list[j], 10)
+                        self.beam.add_beam(self.node_list[i], self.node_list[j])
 
                 elif i % (2 * n + 1) == n and j == i + n + 1:
                     notion_mat[i][j] = 1
-                    self.beam.add_beam(self.node_list[i], self.node_list[j], 10)
+                    self.beam.add_beam(self.node_list[i], self.node_list[j])
 
                 elif i % (2 * n + 1) == 2*n and j == i + n:
                     notion_mat[i][j] = 1
-                    self.beam.add_beam(self.node_list[i], self.node_list[j], 10)
+                    self.beam.add_beam(self.node_list[i], self.node_list[j])
 
         # print(notion_mat)
         return notion_mat
