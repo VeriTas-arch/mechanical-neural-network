@@ -38,7 +38,7 @@ class HexaLattice:
         self.init_pos = []
         self.length = self.settings.length
         self.row_lenh = self.settings.row_lenh
-        self.row_num = self.settings.row_num
+        self.column_lenh = self.settings.column_lenh
 
         # create the nodes and beams
         self._create_nodes(self.space)
@@ -112,8 +112,9 @@ class HexaLattice:
         radius = self.settings.node_radius
         mass = self.settings.float_node_mass
         
+        # the separation between node[0] and the edges of the screen
         sep_x = (self.settings.screen_width - (self.row_lenh - 1) * blen * math.sqrt(3))/2
-        sep_y = (self.settings.screen_height - ((self.row_num - 1)/2) * blen)/2
+        sep_y = (self.settings.screen_height - self.column_lenh * blen)/2
 
         n = self.row_lenh
         T = 2 * n + 1
@@ -121,12 +122,10 @@ class HexaLattice:
         row_counter = 0
 
         for i in range(0, self.length):
-            if column_counter == n:
-                row_counter += 1
 
-            if column_counter == T:
-                column_counter = 0
+            if column_counter == n or column_counter == T:
                 row_counter += 1
+                column_counter = column_counter % T
 
             if column_counter < n:
                 pos_x = sep_x + column_counter * blen * math.sqrt(3)
@@ -135,6 +134,7 @@ class HexaLattice:
             if column_counter >= n and column_counter < T:
                 pos_x = sep_x + (column_counter - n) * blen * math.sqrt(3) - blen * math.sqrt(3) / 2
                 pos_y = sep_y + row_counter * blen / 2
+
             column_counter += 1
 
             if (i + 1) % T == 0 or (i + 1) % T == self.row_lenh + 1:

@@ -10,12 +10,12 @@ class Settings:
         self.bg_color = (230, 230, 230)
         self.gravity = (0, 0)
 
-        # the number of the first row
+        # the number of the first row and the first column
         self.row_lenh = 4
-        # row_num should be an odd number
-        self.row_num = 11
+        self.column_lenh = 5
+
         # the length of the node list
-        self.length = int((2 * self.row_lenh + 1) * (self.row_num - 1)/2 + self.row_lenh)
+        self.length = int((2 * self.row_lenh + 1) * self.column_lenh + self.row_lenh)
 
         # force settings
         self.force_1 = (60, 80)
