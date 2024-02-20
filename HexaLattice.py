@@ -131,7 +131,7 @@ class HexaLattice:
                 pos_x = sep_x + column_counter * blen * math.sqrt(3)
                 pos_y = sep_y + row_counter * blen / 2
                 
-            if column_counter >= n and column_counter < T:
+            elif column_counter >= n and column_counter < T:
                 pos_x = sep_x + (column_counter - n) * blen * math.sqrt(3) - blen * math.sqrt(3) / 2
                 pos_y = sep_y + row_counter * blen / 2
 
