@@ -57,7 +57,7 @@ class HexaLattice:
             # self._check_events()
             self._update_screen()
             self._check_stability()
-            self.space.step(1)
+            self.space.step(2)
             self.clock.tick(self.settings.fps)
 
     def _check_events(self):
@@ -254,7 +254,7 @@ if __name__ == '__main__':
                 point = 1 << i
                 for j in range(node_num):
                     for k in range(node_num):
-                        child[j][k] = point / child[j][k] + point * np.random.rand() / 3
+                        child[j][k] = point / (1 + child[j][k]) + point * np.random.rand() / 3
 
         return child
 
@@ -287,8 +287,7 @@ if __name__ == '__main__':
             for j in range(node_num):
                 pop_pos[i][j] = popGame[i].node_list[j].position
 
-        # get the fitness of the population
-        for i in range(POP_SIZE):
+            # get the fitness of the population
             fitness[i] = get_fitness(pop_pos[i])
 
             # record the best individual
@@ -312,7 +311,7 @@ if __name__ == '__main__':
             pop[popIndex] = child
 
         sleep(0.01)
-    sleep(0.05)
+    sleep(0.01)
 
     # print the best individual
     np.savetxt('individual.csv', eva.best_ind, delimiter=',')
