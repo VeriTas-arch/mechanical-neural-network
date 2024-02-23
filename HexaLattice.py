@@ -217,7 +217,7 @@ if __name__ == '__main__':
 
         rms_in = math.sqrt(sum_input / length)
         rms_out = math.sqrt(sum_output / length)
-        fitness = rms_in + 1 / (rms_out ** 2)
+        fitness = rms_in ** (1/2) + 1/(rms_out ** 2)
 
         return fitness
 
@@ -303,7 +303,6 @@ if __name__ == '__main__':
             parent = pop[popIndex]
             # single-point crossover
             child = crossover(popCopy, parent)
-            # use bit-flipping mutation
             child = mutate(child)
 
             # survival selection, use age-based replacement
@@ -311,6 +310,10 @@ if __name__ == '__main__':
             pop[popIndex] = child
 
         sleep(0.01)
+
+        if gen % 200 == 0:
+            np.savetxt('temp.csv', eva.best_ind, delimiter=',')
+
     sleep(0.01)
 
     # print the best individual
