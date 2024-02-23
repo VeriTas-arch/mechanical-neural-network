@@ -13,14 +13,14 @@ class Operations:
         self.arrow_head_length = self.settings.arrow_head_length
         self.arrow_head_width = self.settings.arrow_head_width
 
-    # function that adds a instantaneous force to the object
     def add_force(self, body, force_vector_x, force_vector_y):
+        """function that adds a instantaneous force to the object"""
         body.apply_force_at_local_point(
             (force_vector_x, force_vector_y), (0, 0))
 
-    # function that draws an arrow, finished by ChatGPT
     def draw_arrow(self, start_pos, end_pos,
                    color=(255, 0, 0), thickness=5):
+        """function that draws an arrow, finished by ChatGPT"""
         # calculate the angle and length of the arrow
         angle = math.atan2(end_pos[1] - start_pos[1],
                            end_pos[0] - start_pos[0])

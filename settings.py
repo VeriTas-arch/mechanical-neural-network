@@ -41,8 +41,8 @@ class Settings:
         self.pop_length = int(self.length * (self.length - 1) / 2)
         self.scale_factor = 10
 
-        self.POP_SIZE = 1000
+        self.POP_SIZE = 100
         self.DNA_SIZE = self.length
-        self.N_GENERATIONS = 500
+        self.N_GENERATIONS = 100
         self.MUTATION_RATE = 0.01
         self.stability_bias = 0.001

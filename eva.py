@@ -4,7 +4,3 @@ class Eva:
     def __init__(self):
         self.max_fitness = 0
         self.best_ind = []
-
-
-
-

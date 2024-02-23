@@ -4,7 +4,6 @@ import pymunk
 import pymunk.pygame_util
 import math
 import numpy as np
-import csv
 
 from pathlib import Path
 from settings import Settings
@@ -39,7 +38,7 @@ class HexaLattice:
         self.node_list = []
         self.init_pos = []
         self.dynamic_pos = []
-        
+
         self.length = self.settings.length
         self.stiffness_mat = stiffness_mat
         self.row_lenh = self.settings.row_lenh
@@ -91,12 +90,12 @@ class HexaLattice:
 
         pygame.display.flip()
 
-    # function that initializes the beams
     def _create_beams(self):
+        """function that initializes the beams"""
         length = self.length
         n = self.row_lenh
         notion_mat = np.zeros((length, length))
-        stiffness_mat = self.stiffness_mat        
+        stiffness_mat = self.stiffness_mat
 
         for i in range(length):
             for j in range(i + 1, length):
@@ -116,12 +115,12 @@ class HexaLattice:
         # print(notion_mat)
         return notion_mat
 
-    # function that initializes the nodes
     def _create_nodes(self, space):
+        """function that initializes the nodes"""
         blen = self.settings.beam_length
         radius = self.settings.node_radius
         mass = self.settings.float_node_mass
-        
+
         sep_x = (self.settings.screen_width - (self.row_lenh - 1) * blen * math.sqrt(3))/2
         sep_y = (self.settings.screen_height - ((self.row_num - 1)/2) * blen)/2
 
@@ -142,7 +141,7 @@ class HexaLattice:
             if column_counter < n:
                 pos_x = sep_x + column_counter * blen * math.sqrt(3)
                 pos_y = sep_y + row_counter * blen / 2
-                
+
             if column_counter >= n and column_counter < T:
                 pos_x = sep_x + (column_counter - n) * blen * math.sqrt(3) - blen * math.sqrt(3) / 2
                 pos_y = sep_y + row_counter * blen / 2
@@ -156,12 +155,11 @@ class HexaLattice:
                 self.node_list.append(self.node.add_float_node(space, radius, mass, (pos_x, pos_y)))
                 self.init_pos.append((pos_x, pos_y))
 
-      
 
 if __name__ == '__main__':
     # read the stiffness matrix from the csv file
     path = Path(__file__).parent / "individual.csv"
-    stiffness_mat = np.loadtxt(open(path,"rb"),delimiter=",",skiprows=0)
+    stiffness_mat = np.loadtxt(open(path, "rb"), delimiter=",", skiprows=0)
     print(stiffness_mat)
 
     # create the HexaLattice object

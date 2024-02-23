@@ -4,9 +4,7 @@ import pymunk
 import pymunk.pygame_util
 import math
 import numpy as np
-import csv
 
-from pathlib import Path
 from settings import Settings
 from beam import Beam
 from node import Node
@@ -31,7 +29,7 @@ class HexaLattice:
         # initialize pymunk
         self.space = pymunk.Space()
         self.space.gravity = self.settings.gravity
-        self.draw_option = pymunk.pygame_util.DrawOptions(self.screen)
+        # self.draw_option = pymunk.pygame_util.DrawOptions(self.screen)
 
         # initialize the objects from the external classes
         self.beam = Beam(self)
@@ -42,15 +40,11 @@ class HexaLattice:
         self.node_list = []
         self.init_pos = []
         self.dynamic_pos = []
-        
+
         self.length = self.settings.length
         self.stiffness_mat = stiffness_mat
         self.row_lenh = self.settings.row_lenh
         self.row_num = self.settings.row_num
-
-        # relative parameter of the Genetic Algorithm
-        self.N_GENERATIONS = self.settings.N_GENERATIONS
-        self.generation = 0
 
         # create the nodes and beams
         self._create_nodes(self.space)
@@ -75,8 +69,8 @@ class HexaLattice:
 
     def _update_screen(self):
         """Update the screen"""
-        self.screen.fill(self.settings.bg_color)
-        self.space.debug_draw(self.draw_option)
+        # self.screen.fill(self.settings.bg_color)
+        # self.space.debug_draw(self.draw_option)
 
         # record the dynamic position of the nodes
         self._update_pos()
@@ -91,37 +85,37 @@ class HexaLattice:
 
         # pygame.display.flip()
 
-    # function that initializes the beams
     def _create_beams(self):
+        """function that initializes the beams"""
         length = self.length
         n = self.row_lenh
-        notion_mat = np.zeros((length, length))
-        stiffness_mat = self.stiffness_mat        
+        # notion_mat = np.zeros((length, length))
+        stiffness_mat = self.stiffness_mat
 
         for i in range(length):
             for j in range(i + 1, length):
                 if i % (2 * n + 1) != n and i % (2 * n + 1) != 2 * n:
                     if j == i + n or j == i + n + 1 or j == i + 2 * n + 1:
-                        notion_mat[i][j] = 1
+                        # notion_mat[i][j] = 1
                         self.beam.add_beam(self.node_list[i], self.node_list[j], stiffness_mat[i][j])
 
                 elif i % (2 * n + 1) == n and j == i + n + 1:
-                    notion_mat[i][j] = 1
+                    # notion_mat[i][j] = 1
                     self.beam.add_beam(self.node_list[i], self.node_list[j], stiffness_mat[i][j])
 
                 elif i % (2 * n + 1) == 2*n and j == i + n:
-                    notion_mat[i][j] = 1
+                    # notion_mat[i][j] = 1
                     self.beam.add_beam(self.node_list[i], self.node_list[j], stiffness_mat[i][j])
 
         # print(notion_mat)
-        return notion_mat
+        # return notion_mat
 
-    # function that initializes the nodes
     def _create_nodes(self, space):
+        """function that initializes the nodes"""
         blen = self.settings.beam_length
         radius = self.settings.node_radius
         mass = self.settings.float_node_mass
-        
+
         sep_x = (self.settings.screen_width - (self.row_lenh - 1) * blen * math.sqrt(3))/2
         sep_y = (self.settings.screen_height - ((self.row_num - 1)/2) * blen)/2
 
@@ -142,7 +136,7 @@ class HexaLattice:
             if column_counter < n:
                 pos_x = sep_x + column_counter * blen * math.sqrt(3)
                 pos_y = sep_y + row_counter * blen / 2
-                
+
             if column_counter >= n and column_counter < T:
                 pos_x = sep_x + (column_counter - n) * blen * math.sqrt(3) - blen * math.sqrt(3) / 2
                 pos_y = sep_y + row_counter * blen / 2
@@ -156,23 +150,22 @@ class HexaLattice:
                 self.node_list.append(self.node.add_float_node(space, radius, mass, (pos_x, pos_y)))
                 self.init_pos.append((pos_x, pos_y))
 
-    # check if the network is stable
     def _check_stability(self):
+        """check if the network is stable"""
         bias = 0
         for i in range(len(self.node_list)):
             x_bias = (self.node_list[i].position[0] - self.dynamic_pos[i][0]) ** 2
             y_bias = (self.node_list[i].position[1] - self.dynamic_pos[i][1]) ** 2
             bias += math.sqrt(x_bias + y_bias)
-            
+
         if bias < self.settings.stability_bias:
             self.running = False
             return True
 
-    # record the dynamic position of the nodes
     def _update_pos(self):
+        """record the dynamic position of the nodes"""
         for i in range(len(self.node_list)):
             self.dynamic_pos[i] = self.node_list[i].position
-
 
 
 if __name__ == '__main__':
@@ -182,33 +175,33 @@ if __name__ == '__main__':
     eva = Eva()
 
     node_num = set.length
-    fillBits = lambda size: (1 << size) - 1
+
+    def fillBits(size):
+        return 1 << size - 1
 
     POP_SIZE = set.POP_SIZE
     N_GENERATIONS = set.N_GENERATIONS
     DNA_SIZE = set.DNA_SIZE
     MUTATION_RATE = set.MUTATION_RATE
 
-    generation = 0
-
-    # set sine function as target function
     def target_function():
+        """set sine function as target function"""
         T = set.screen_width
         omiga = 2 * math.pi / T
         Amp = set.beam_length / 2
         bias = Amp / 2
         return lambda x: Amp * math.sin(omiga * x) + set.screen_height + bias
 
-    # set the function that the input nodes should avoid
     def avoid_function():
+        """set the function that the input nodes should avoid"""
         T = set.screen_width
         omiga = 2 * math.pi / T
         Amp = set.beam_length / 2
         bias = 0
         return lambda x: Amp * math.sin(omiga * x + math.pi) + bias
 
-    # calculate the fitness of a certain individual
     def get_fitness(indPos):
+        """calculate the fitness of a certain individual"""
         target = target_function()
         avoid = avoid_function()
         length = set.row_lenh
@@ -224,12 +217,12 @@ if __name__ == '__main__':
 
         rms_in = math.sqrt(sum_input / length)
         rms_out = math.sqrt(sum_output / length)
-        fitness =  rms_in ** 2 + 1 / (rms_out ** 2)
+        fitness = rms_in + 1 / (rms_out ** 2)
 
         return fitness
 
-    # choose the parent based on fitness
     def select_parent(pop, fitness):
+        """choose the parent based on fitness"""
         fitness = np.array(fitness)
         index = np.random.choice(POP_SIZE, size=POP_SIZE, replace=True, p=fitness / sum(fitness))
         temp = []
@@ -237,39 +230,32 @@ if __name__ == '__main__':
             temp.append(pop[index[i]])
         return temp
 
-    # crossover the parents to generate offspring
     def crossover(pop, parent):
+        """crossover the parents to generate offspring"""
         # choose an individual from the population to crossover
         index = np.random.randint(0, POP_SIZE - 1)
-        
         # choose a crossover point
         point = np.random.randint(1, DNA_SIZE - 1)
 
         crossover_result = []
-        temp = []
-        for i in range(node_num):
-            crossover_result.append([])
-            temp.append([])
 
         for i in range(node_num):
-            for j in range(node_num):
-                if j < point:
-                    crossover_result[i].append(parent[i][j])
-                else:
-                    crossover_result[i].append(pop[index][i][j])
-            # temp[i] = np.random.shuffle(crossover_result[i])
+            crossover_result.append([])
+            crossover_result[i].extend(parent[i][:point])
+            crossover_result[i].extend(pop[index][i][point:])
+            np.random.shuffle(crossover_result[i])
 
         return crossover_result
 
-    # mutation operator
     def mutate(child):
+        """mutation operator"""
         for i in range(DNA_SIZE):
-            point = 1 << i
             if np.random.rand() < MUTATION_RATE:
+                point = 1 << i
                 for j in range(node_num):
                     for k in range(node_num):
                         child[j][k] = point / child[j][k] + point * np.random.rand() / 3
-                
+
         return child
 
     pop = []
@@ -301,7 +287,6 @@ if __name__ == '__main__':
             for j in range(node_num):
                 pop_pos[i][j] = popGame[i].node_list[j].position
 
-        # evolve the population in a certain generation  
         # get the fitness of the population
         for i in range(POP_SIZE):
             fitness[i] = get_fitness(pop_pos[i])
@@ -325,12 +310,12 @@ if __name__ == '__main__':
             # survival selection, use age-based replacement
             # the number of parents and children is the same, so all children are replaced with parents
             pop[popIndex] = child
-        
+
         sleep(0.01)
     sleep(0.05)
 
     # print the best individual
-    np.savetxt('individual.csv', eva.best_ind, delimiter = ',')
+    np.savetxt('individual.csv', eva.best_ind, delimiter=',')
 
     print("Best individual: ", eva.best_ind)
     print("Fitness: ", eva.max_fitness)
