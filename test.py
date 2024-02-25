@@ -1,15 +1,12 @@
 import numpy as np
 
-parent = np.random.randn(11, 11)
-pop = np.random.randn(11, 11)
+def ret(x, y):
+    return x, y
 
-crossover_result = []
+# 创建数组（3维）
+a = np.arange(100).reshape((10, 5, 2))
 
-for i in range(11):
-    crossover_result.append([])
-
-for i in range(11):
-            crossover_result[i].extend(parent[i][:3])
-            crossover_result[i].extend(pop[2][3:])
-
-print(crossover_result[0])
+arr = np.array([1, 2, 3, 4, 5])
+sort_fitness = np.argsort(arr)
+point = np.random.choice(5, p=sort_fitness / sum(sort_fitness))
+print(point)

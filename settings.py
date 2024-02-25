@@ -4,9 +4,9 @@ class Settings:
     def __init__(self):
         """initilize the settings of the stimulation environment"""
         # screen settings
-        self.screen_width = 960
+        self.screen_width = 720
         self.screen_height = 540
-        self.fps = 120
+        self.fps = 60
         self.bg_color = (230, 230, 230)
         self.gravity = (0, 0)
 
@@ -28,7 +28,7 @@ class Settings:
         self.arrow_head_width = 8
 
         # beam settings
-        self.damping = 10
+        self.damping = 20
         self.beam_length = 100
 
         # node settings
@@ -36,13 +36,21 @@ class Settings:
         self.node_radius = 20
         self.float_node_mass = 10
 
-        # evolution algorithm settings
+        """evolution algorithm settings"""
         # population size, which is C(length, 2)
         self.pop_length = int(self.length * (self.length - 1) / 2)
         self.scale_factor = 10
 
-        self.POP_SIZE = 100
+        self.POP_SIZE = 5
         self.DNA_SIZE = self.length
         self.N_GENERATIONS = 100
         self.MUTATION_RATE = 0.01
-        self.stability_bias = 0.001
+
+        # stability analysis settings
+        self.stability_bias = 1e-30
+        self.stability_inf = 30
+
+        # resume and record settings
+        self.resume = False
+        self.record = True
+        self.record_interval = 100

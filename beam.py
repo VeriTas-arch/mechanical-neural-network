@@ -16,3 +16,5 @@ class Beam:
         beam_length = self.beam_length
         spring = pymunk.DampedSpring(body_1, body_2, (0, 0), (0, 0), beam_length, stiffness, damping)
         self.space.add(spring)
+
+        return spring

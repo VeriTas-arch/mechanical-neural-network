@@ -18,7 +18,7 @@ class Node:
         shape.color = self.float_node_color
 
         space.add(body, shape)
-        return body
+        return body, shape
 
     def add_static_node(self, space, radius, pos):
         """function that adds a static node"""
@@ -27,4 +27,4 @@ class Node:
         shape = pymunk.Circle(body, radius)
 
         space.add(body, shape)
-        return body
+        return body, shape

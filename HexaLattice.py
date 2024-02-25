@@ -25,11 +25,13 @@ class HexaLattice:
         self.screen = pygame.display.set_mode(
             (self.settings.screen_width, self.settings.screen_height))
         pygame.display.set_caption("Mechanical Neural Network")
+        self.step_counter = 0
+        self.step_interval = 50
 
         # initialize pymunk
         self.space = pymunk.Space()
         self.space.gravity = self.settings.gravity
-        # self.draw_option = pymunk.pygame_util.DrawOptions(self.screen)
+        self.draw_option = pymunk.pygame_util.DrawOptions(self.screen)
 
         # initialize the objects from the external classes
         self.beam = Beam(self)
@@ -38,8 +40,20 @@ class HexaLattice:
 
         # initialize the lists
         self.node_list = []
+        self.beam_list = []
         self.init_pos = []
         self.dynamic_pos = []
+        self.node_record = []
+
+        for i in range(self.settings.length):
+            self.node_list.append(None)
+            self.node_record.append(None)
+            self.init_pos.append((0, 0))
+            self.dynamic_pos.append((0, 0))
+            self.beam_list.append([])
+
+            for j in range(self.settings.length):
+                self.beam_list[i].append(None)
 
         self.length = self.settings.length
         self.stiffness_mat = stiffness_mat
@@ -48,32 +62,34 @@ class HexaLattice:
 
         # create the nodes and beams
         self._create_nodes(self.space)
-        self._create_beams()
+        self._create_beams(self.stiffness_mat)
 
         self.running = True
 
     def run_game(self):
-        while self.running:
-            # self._check_events()
+        """Main game loop"""
+        # while self.running:
+        for _ in range(self.step_interval):
+            self._check_events()
             self._update_screen()
             self._check_stability()
-            self.space.step(2)
+            self.step_counter += 1
+            self.space.step(1)
             self.clock.tick(self.settings.fps)
+
+            # record the dynamic position of the nodes
+            self._update_pos()
 
     def _check_events(self):
         """Respond to user input"""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.running = False
                 sys.exit()
 
     def _update_screen(self):
         """Update the screen"""
-        # self.screen.fill(self.settings.bg_color)
-        # self.space.debug_draw(self.draw_option)
-
-        # record the dynamic position of the nodes
-        self._update_pos()
+        self.screen.fill(self.settings.bg_color)
+        self.space.debug_draw(self.draw_option)
 
         # apply force to the nodes
         body_1 = self.node_list[0]
@@ -83,29 +99,31 @@ class HexaLattice:
         self.operations.add_force(body_1, force_1_x, force_1_y)
         self.operations.add_force(body_2, force_2_x, force_2_y)
 
-        # pygame.display.flip()
+        pygame.display.flip()
 
-    def _create_beams(self):
+    def _create_beams(self, stiffness_mat):
         """function that initializes the beams"""
         length = self.length
         n = self.row_lenh
         # notion_mat = np.zeros((length, length))
-        stiffness_mat = self.stiffness_mat
 
         for i in range(length):
             for j in range(i + 1, length):
                 if i % (2 * n + 1) != n and i % (2 * n + 1) != 2 * n:
                     if j == i + n or j == i + n + 1 or j == i + 2 * n + 1:
                         # notion_mat[i][j] = 1
-                        self.beam.add_beam(self.node_list[i], self.node_list[j], stiffness_mat[i][j])
+                        self.beam_list[i][j] = self.beam.add_beam(
+                            self.node_list[i], self.node_list[j], stiffness_mat[i][j])
 
                 elif i % (2 * n + 1) == n and j == i + n + 1:
                     # notion_mat[i][j] = 1
-                    self.beam.add_beam(self.node_list[i], self.node_list[j], stiffness_mat[i][j])
+                    self.beam_list[i][j] = self.beam.add_beam(
+                        self.node_list[i], self.node_list[j], stiffness_mat[i][j])
 
                 elif i % (2 * n + 1) == 2*n and j == i + n:
                     # notion_mat[i][j] = 1
-                    self.beam.add_beam(self.node_list[i], self.node_list[j], stiffness_mat[i][j])
+                    self.beam_list[i][j] = self.beam.add_beam(
+                        self.node_list[i], self.node_list[j], stiffness_mat[i][j])
 
         # print(notion_mat)
         # return notion_mat
@@ -125,7 +143,6 @@ class HexaLattice:
         row_counter = 0
 
         for i in range(0, self.length):
-            self.dynamic_pos.append((0, 0))
             if column_counter == n:
                 row_counter += 1
 
@@ -143,29 +160,72 @@ class HexaLattice:
             column_counter += 1
 
             if (i + 1) % T == 0 or (i + 1) % T == self.row_lenh + 1:
-                self.node_list.append(self.node.add_static_node(space, radius, (pos_x, pos_y)))
-                self.init_pos.append((pos_x, pos_y))
-
+                self.node_record[i] = self.node.add_static_node(space, radius, (pos_x, pos_y))
+                self.node_list[i] = self.node_record[i][0]
+                
             else:
-                self.node_list.append(self.node.add_float_node(space, radius, mass, (pos_x, pos_y)))
-                self.init_pos.append((pos_x, pos_y))
+                self.node_record[i] = self.node.add_float_node(space, radius, mass, (pos_x, pos_y))
+                self.node_list[i] = self.node_record[i][0]
+
+            self.init_pos[i] = (pos_x, pos_y)
+
+    def _create_float_nodes(self, space):
+        """function that initializes the float nodes"""
+        n = self.row_lenh
+        T = 2 * n + 1
+        radius = self.settings.node_radius
+        mass = self.settings.float_node_mass
+
+        for i in range (self.length):
+            if (i + 1) % T != 0 and (i + 1) % T != self.row_lenh + 1:
+                self.node_record[i] = self.node.add_float_node(space, radius, mass, self.init_pos[i])
+                self.node_list[i] = self.node_record[i][0]
+                self.dynamic_pos[i] = self.init_pos[i]
+
+    def _delete_float_nodes(self):
+        """function that removes the float nodes"""
+        for i in range(self.length):
+            if self.node_list[i] is not None and self.node_list[i].body_type == pymunk.Body.DYNAMIC:
+                self.space.remove(self.node_record[i][0])
+                self.space.remove(self.node_record[i][1])
+                self.node_list[i] = None
+
+    def _delete_beams(self):
+        """function that removes the beams"""
+        for i in range(self.length):
+            for j in range(i + 1, self.length):
+                if self.beam_list[i][j] is not None:
+                    self.space.remove(self.beam_list[i][j])
+                    self.beam_list[i][j] = None
 
     def _check_stability(self):
         """check if the network is stable"""
         bias = 0
-        for i in range(len(self.node_list)):
+        for i in range(self.length):
             x_bias = (self.node_list[i].position[0] - self.dynamic_pos[i][0]) ** 2
             y_bias = (self.node_list[i].position[1] - self.dynamic_pos[i][1]) ** 2
-            bias += math.sqrt(x_bias + y_bias)
+            bias += x_bias + y_bias
 
-        if bias < self.settings.stability_bias:
+        rms = math.sqrt(bias / self.length)
+
+        if rms < self.settings.stability_bias and self.step_counter > self.settings.stability_inf:
             self.running = False
-            return True
+        return True
 
     def _update_pos(self):
         """record the dynamic position of the nodes"""
-        for i in range(len(self.node_list)):
+        for i in range(self.length):
             self.dynamic_pos[i] = self.node_list[i].position
+
+    def _reset_game(self, stiffness_mat):
+        """reset the game"""
+        self._delete_float_nodes()
+        self._delete_beams()
+        self._create_float_nodes(self.space)
+        self._create_beams(stiffness_mat)
+
+        self.step_counter = 0
+        self.running = True
 
 
 if __name__ == '__main__':
@@ -175,6 +235,9 @@ if __name__ == '__main__':
     eva = Eva()
 
     node_num = set.length
+    record_interval = set.record_interval
+    max_fitness = eva.max_fitness
+    best_ind = eva.best_ind
 
     def fillBits(size):
         return 1 << size - 1
@@ -186,38 +249,58 @@ if __name__ == '__main__':
 
     def target_function():
         """set sine function as target function"""
-        T = set.screen_width
-        omiga = 2 * math.pi / T
-        Amp = set.beam_length / 2
-        bias = Amp / 2
-        return lambda x: Amp * math.sin(omiga * x) + set.screen_height + bias
+        # define the constants
+        blen = set.beam_length
+        sep_x = (set.screen_width - (set.row_lenh - 1) * blen * math.sqrt(3))/2
+        sep_y = (set.screen_height - ((set.row_num - 1)/2) * blen)/2
 
-    def avoid_function():
+        # define the sine function related parameters
+        T = set.beam_length * 2 * math.sqrt(3) * 1.02
+        omiga = 2 * math.pi / T
+        Amp = set.beam_length / 25
+        # bias = set.beam_length * 0.65
+        bias = set.screen_height - sep_y + 7
+        return lambda x: Amp * math.sin(omiga * (x - sep_x) + math.pi/2) + bias
+
+    def avoid_function_lin():
         """set the function that the input nodes should avoid"""
+        # type1 linear function
+        sep_y = (set.screen_height - ((set.row_num - 1)/2) * set.beam_length)/2
+        Amp = set.beam_length / 2
+        bias = Amp / 3
+        return lambda x: sep_y + bias
+
+    def avoid_function_sin():
+        """set the function that the input nodes should avoid"""
+        # type2 sine function
         T = set.screen_width
         omiga = 2 * math.pi / T
         Amp = set.beam_length / 2
-        bias = 0
+        bias = Amp / 4
         return lambda x: Amp * math.sin(omiga * x + math.pi) + bias
 
     def get_fitness(indPos):
         """calculate the fitness of a certain individual"""
         target = target_function()
-        avoid = avoid_function()
+        # avoid = avoid_function_sin()
         length = set.row_lenh
         num = node_num
         sum_input = 0
         sum_output = 0
 
         for i in range(length):
-            bias_in = (avoid(indPos[i][0]) - indPos[i][1]) ** 2
+            # bias_in = (avoid(indPos[i][0]) - indPos[i][1]) ** 2
+            print(f"node {num - i - 1} position: {indPos[num - i - 1]}")
+            print(f"target {num - i - 1}: {target(indPos[num - i - 1][0])}")
+            print(f"reference position: {indPos[7]}")
             bias_out = (target(indPos[num - i - 1][0]) - indPos[num - i - 1][1]) ** 2
-            sum_input += bias_in
+            # sum_input += bias_in
             sum_output += bias_out
 
-        rms_in = math.sqrt(sum_input / length)
+        # rms_in = math.sqrt(sum_input / length)
         rms_out = math.sqrt(sum_output / length)
-        fitness = rms_in ** (1/2) + 1/(rms_out ** 2)
+        # fitness = rms_in ** (1/4) + 1 / (rms_out + 1)
+        fitness = 1 / (math.exp(rms_out) + 1)
 
         return fitness
 
@@ -249,55 +332,77 @@ if __name__ == '__main__':
 
     def mutate(child):
         """mutation operator"""
+        child = np.array(child)
+        sup = np.max(child)
+        inf = np.min(child)
+        interval = sup - inf
+
+        # mutation process
         for i in range(DNA_SIZE):
             if np.random.rand() < MUTATION_RATE:
-                point = 1 << i
-                for j in range(node_num):
-                    for k in range(node_num):
-                        child[j][k] = point / (1 + child[j][k]) + point * np.random.rand() / 3
+                point = i
+                child = point + interval / (1+ child) + point * np.random.rand(node_num, node_num)
 
         return child
 
+    """initialize the population and the population's position"""
     pop = []
+    new_pop = []
+    # store the positions of nodes in each individual
+    pop_pos = []
+    # store the fitness of each individual
+    fitness = []
+
     for i in range(POP_SIZE):
         # generate a random stiffness matrix as the initial population
         stiffness_mat = np.random.rand(node_num, node_num) * 20
         pop.append(stiffness_mat)
 
-    for gen in tqdm(range(N_GENERATIONS), colour='red', desc='EVA'):
-        """initialize the population and the population's position"""
-        # the population that is to be evolved, whose individuals are HexaLattice objects
-        popGame = []
-        # store the positions of nodes in each individual
-        pop_pos = []
-        # store the fitness of each individual
-        fitness = []
+        fitness.append(0)
+        pop_pos.append([])
+        for j in range(node_num):
+            pop_pos[i].append(None)
 
-        for i in range(POP_SIZE):
-            popGame.append(HexaLattice(pop[i]))
-            fitness.append(0)
-            pop_pos.append([])
-            for j in range(node_num):
-                pop_pos[i].append(popGame[i].node_list[j].position)
+    """RESUME from the last generation"""
+    resume = set.resume
+    if resume:
+        stiffness_data = np.load(file="data.npy")
+        pop = stiffness_data
 
-        """evolution process"""
+    init_stiffness = np.random.rand(node_num, node_num) * 20
+    # the population that is to be evolved, whose individuals are HexaLattice objects
+    popGame = HexaLattice(init_stiffness)
+    popGame.run_game()
+    print("\nEvolution starts")
+
+    """evolution process"""
+    for gen in tqdm(range(N_GENERATIONS), colour='red', desc='EVA', dynamic_ncols=True):
+
         # calculate the fitness of the current generation
         for i in range(POP_SIZE):
-            popGame[i].run_game()
+            # pop[i] = np.random.rand(node_num, node_num) * 40 * np.random.rand()
+            popGame._reset_game(pop[i])
+            popGame.run_game()
+
             for j in range(node_num):
-                pop_pos[i][j] = popGame[i].node_list[j].position
+                pop_pos[i][j] = popGame.node_list[j].position
 
             # get the fitness of the population
             fitness[i] = get_fitness(pop_pos[i])
 
             # record the best individual
-            if fitness[i] > eva.max_fitness:
-                eva.max_fitness = fitness[i]
-                eva.best_ind = pop[i].copy()
+            if fitness[i] > max_fitness:
+                max_fitness = fitness[i]
+                best_ind = pop[i].copy()
+                print(f"\nthe current best fitness is {max_fitness}")
+
+            # sort the population based on fitness
+            sort_fitness = np.argsort(fitness)
+            pop_fitness = [pop[i] for i in sort_fitness]
 
         # chosse the parent based on fitness
-        pop = select_parent(pop, fitness)
         popCopy = pop.copy()
+        pop = select_parent(pop, fitness)
 
         for popIndex in range(POP_SIZE):
             parent = pop[popIndex]
@@ -309,15 +414,24 @@ if __name__ == '__main__':
             # the number of parents and children is the same, so all children are replaced with parents
             pop[popIndex] = child
 
+        # create the new population
+        fit_point = np.random.choice(POP_SIZE, p=sort_fitness / sum(sort_fitness))
+        new_pop = pop[:fit_point]
+        new_pop.extend(pop_fitness[fit_point:])
+        pop = new_pop.copy()
+
         sleep(0.01)
 
-        if gen % 200 == 0:
-            np.savetxt('temp.csv', eva.best_ind, delimiter=',')
+        """RECORD the last generation"""
+        record = set.record
+        if record and gen % record_interval == 0:
+            pop_data = pop.copy()
+            temp_data = np.array(pop_data)
+            np.save(file="data.npy", arr=temp_data)           
 
-    sleep(0.01)
 
     # print the best individual
-    np.savetxt('individual.csv', eva.best_ind, delimiter=',')
+    np.savetxt('individual.csv', best_ind, delimiter=',')
 
-    print("Best individual: ", eva.best_ind)
-    print("Fitness: ", eva.max_fitness)
+    print("Best individual: ", best_ind)
+    print("Fitness: ", max_fitness)
