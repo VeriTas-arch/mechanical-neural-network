@@ -9,8 +9,8 @@ class Node:
         self.settings = me_network.settings
         self.float_node_color = self.settings.float_node_color
 
-    # function that adds a new float node
     def add_float_node(self, space, radius, mass, pos):
+        """function that adds a new float node"""
         body = pymunk.Body()
         body.position = pos
         shape = pymunk.Circle(body, radius)
@@ -18,13 +18,13 @@ class Node:
         shape.color = self.float_node_color
 
         space.add(body, shape)
-        return body
+        return body, shape
 
-    # function that adds a static node
     def add_static_node(self, space, radius, pos):
+        """function that adds a static node"""
         body = pymunk.Body(body_type=pymunk.Body.STATIC)
         body.position = pos
         shape = pymunk.Circle(body, radius)
 
         space.add(body, shape)
-        return body
+        return body, shape
