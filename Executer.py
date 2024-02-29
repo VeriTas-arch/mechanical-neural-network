@@ -41,14 +41,12 @@ class HexaLattice:
         self.node_list = []
         self.beam_list = []
         self.init_pos = []
-        self.dynamic_pos = []
         self.node_record = []
 
         for i in range(self.settings.length):
             self.node_list.append(None)
             self.node_record.append(None)
             self.init_pos.append((0, 0))
-            self.dynamic_pos.append((0, 0))
             self.beam_list.append([])
 
             for j in range(self.settings.length):
@@ -70,10 +68,12 @@ class HexaLattice:
         while self.running:
             self._check_events()
             self._update_screen()
+
             if self.step_counter == 200:
                 print(self.node_list[7].position)
                 print(self.node_list[10].position)
                 print(self.node_list[11].position)
+
             self.step_counter += 1
             self.space.step(1)
             self.clock.tick(self.settings.fps)
