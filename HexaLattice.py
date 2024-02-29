@@ -3,13 +3,15 @@ import pygame
 import pymunk
 import pymunk.pygame_util
 import math
+import EVA
+
 import numpy as np
+import matplotlib.pyplot as plt
 
 from settings import Settings
 from beam import Beam
 from node import Node
 from operations import Operations
-import EVA
 from time import sleep
 from tqdm import tqdm
 
@@ -271,6 +273,14 @@ if __name__ == '__main__':
     popGame.run_game()
     print("\nEvolution starts")
 
+    """initialize the plot"""
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    x = []
+    y = []
+
+    plt.ion()
+
     """evolution process"""
     for gen in tqdm(range(N_GENERATIONS), colour='red', desc='EVA', dynamic_ncols=True):
 
@@ -286,6 +296,20 @@ if __name__ == '__main__':
             # get the fitness of the population
             fitness[i] = EVA.get_fitness(pop_pos[i], node_num)
 
+            # draw the fitness dots
+            x.append(gen)
+            y.append(fitness[i])
+
+            ax.clear()
+            ax.scatter(x, y, c='r', s=10)
+
+            plt.xlabel('Generation')
+            plt.ylabel('Fitness')
+            plt.title('EVA')
+
+            plt.draw()
+            plt.pause(0.01)
+
             # record the best individual
             if fitness[i] > max_fitness:
                 max_fitness = fitness[i]
@@ -299,6 +323,7 @@ if __name__ == '__main__':
         # chosse the parent based on fitness
         popCopy = pop.copy()
         pop = EVA.select_parent(pop, fitness)
+
 
         for popIndex in range(POP_SIZE):
             parent = pop[popIndex]
@@ -330,3 +355,6 @@ if __name__ == '__main__':
 
     print("Best individual: ", best_ind)
     print("Fitness: ", max_fitness)
+
+    plt.ioff()
+    plt.show()

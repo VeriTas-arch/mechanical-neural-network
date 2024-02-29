@@ -100,6 +100,7 @@ def crossover(pop, parent):
     index = np.random.randint(0, POP_SIZE - 1)
     # choose a crossover point
     point = np.random.randint(1, DNA_SIZE - 1)
+    # point = 6
 
     crossover_result = []
 
@@ -107,7 +108,8 @@ def crossover(pop, parent):
         crossover_result.append([])
         crossover_result[i].extend(parent[i][:point])
         crossover_result[i].extend(pop[index][i][point:])
-        np.random.shuffle(crossover_result[i])
+        if index < np.random.rand() * POP_SIZE:
+            np.random.shuffle(crossover_result[i])
 
     return crossover_result
 
