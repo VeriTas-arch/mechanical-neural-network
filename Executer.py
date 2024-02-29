@@ -12,6 +12,7 @@ from operations import Operations
 from time import sleep
 from pathlib import Path
 
+import EVA
 
 
 class HexaLattice:
@@ -41,12 +42,14 @@ class HexaLattice:
         self.node_list = []
         self.beam_list = []
         self.init_pos = []
+        self.dynamic_pos = []
         self.node_record = []
 
         for i in range(self.settings.length):
             self.node_list.append(None)
             self.node_record.append(None)
             self.init_pos.append((0, 0))
+            self.dynamic_pos.append((0, 0))
             self.beam_list.append([])
 
             for j in range(self.settings.length):
@@ -65,15 +68,13 @@ class HexaLattice:
 
     def run_game(self):
         """Main game loop"""
-        while self.running:
+        for _ in range(50):
             self._check_events()
             self._update_screen()
-
-            if self.step_counter == 200:
-                print(self.node_list[7].position)
-                print(self.node_list[10].position)
-                print(self.node_list[11].position)
-
+#            if self.step_counter == 200:
+#                print(self.node_list[7].position)
+#                print(self.node_list[10].position)
+#                print(self.node_list[11].position)
             self.step_counter += 1
             self.space.step(1)
             self.clock.tick(self.settings.fps)
@@ -177,3 +178,15 @@ if __name__ == '__main__':
     hexalattice = HexaLattice(stiffness_mat)
     # run the game
     hexalattice.run_game()
+
+    #calculate the fitness
+    set = Settings()
+    node_num = set.length
+    pop_pos = []
+    for j in range(node_num):
+        pop_pos.append(hexalattice.node_list[j].position)
+        print(hexalattice.node_list[j].position)
+    print("the fitness is:", EVA.get_fitness(pop_pos,node_num))
+
+
+
