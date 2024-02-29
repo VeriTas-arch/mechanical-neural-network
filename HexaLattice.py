@@ -9,7 +9,7 @@ from settings import Settings
 from beam import Beam
 from node import Node
 from operations import Operations
-from eva import Eva
+import EVA
 from time import sleep
 from tqdm import tqdm
 
@@ -162,7 +162,7 @@ class HexaLattice:
             if (i + 1) % T == 0 or (i + 1) % T == self.row_lenh + 1:
                 self.node_record[i] = self.node.add_static_node(space, radius, (pos_x, pos_y))
                 self.node_list[i] = self.node_record[i][0]
-                
+
             else:
                 self.node_record[i] = self.node.add_float_node(space, radius, mass, (pos_x, pos_y))
                 self.node_list[i] = self.node_record[i][0]
@@ -176,7 +176,7 @@ class HexaLattice:
         radius = self.settings.node_radius
         mass = self.settings.float_node_mass
 
-        for i in range (self.length):
+        for i in range(self.length):
             if (i + 1) % T != 0 and (i + 1) % T != self.row_lenh + 1:
                 self.node_record[i] = self.node.add_float_node(space, radius, mass, self.init_pos[i])
                 self.node_list[i] = self.node_record[i][0]
@@ -232,118 +232,14 @@ if __name__ == '__main__':
     """define the EVA functions and initialize the parameters"""
 
     set = Settings()
-    eva = Eva()
+    eva = EVA.Eva()
 
     node_num = set.length
     record_interval = set.record_interval
-    max_fitness = eva.max_fitness
-    best_ind = eva.best_ind
-
-    def fillBits(size):
-        return 1 << size - 1
-
     POP_SIZE = set.POP_SIZE
     N_GENERATIONS = set.N_GENERATIONS
-    DNA_SIZE = set.DNA_SIZE
-    MUTATION_RATE = set.MUTATION_RATE
-
-    def target_function():
-        """set sine function as target function"""
-        # define the constants
-        blen = set.beam_length
-        sep_x = (set.screen_width - (set.row_lenh - 1) * blen * math.sqrt(3))/2
-        sep_y = (set.screen_height - ((set.row_num - 1)/2) * blen)/2
-
-        # define the sine function related parameters
-        T = set.beam_length * 2 * math.sqrt(3) * 1.02
-        omiga = 2 * math.pi / T
-        Amp = set.beam_length / 25
-        # bias = set.beam_length * 0.65
-        bias = set.screen_height - sep_y + 7
-        return lambda x: Amp * math.sin(omiga * (x - sep_x) + math.pi/2) + bias
-
-    def avoid_function_lin():
-        """set the function that the input nodes should avoid"""
-        # type1 linear function
-        sep_y = (set.screen_height - ((set.row_num - 1)/2) * set.beam_length)/2
-        Amp = set.beam_length / 2
-        bias = Amp / 3
-        return lambda x: sep_y + bias
-
-    def avoid_function_sin():
-        """set the function that the input nodes should avoid"""
-        # type2 sine function
-        T = set.screen_width
-        omiga = 2 * math.pi / T
-        Amp = set.beam_length / 2
-        bias = Amp / 4
-        return lambda x: Amp * math.sin(omiga * x + math.pi) + bias
-
-    def get_fitness(indPos):
-        """calculate the fitness of a certain individual"""
-        target = target_function()
-        # avoid = avoid_function_sin()
-        length = set.row_lenh
-        num = node_num
-        sum_input = 0
-        sum_output = 0
-
-        for i in range(length):
-            # bias_in = (avoid(indPos[i][0]) - indPos[i][1]) ** 2
-            print(f"node {num - i - 1} position: {indPos[num - i - 1]}")
-            print(f"target {num - i - 1}: {target(indPos[num - i - 1][0])}")
-            print(f"reference position: {indPos[7]}")
-            bias_out = (target(indPos[num - i - 1][0]) - indPos[num - i - 1][1]) ** 2
-            # sum_input += bias_in
-            sum_output += bias_out
-
-        # rms_in = math.sqrt(sum_input / length)
-        rms_out = math.sqrt(sum_output / length)
-        # fitness = rms_in ** (1/4) + 1 / (rms_out + 1)
-        fitness = 1 / (math.exp(rms_out) + 1)
-
-        return fitness
-
-    def select_parent(pop, fitness):
-        """choose the parent based on fitness"""
-        fitness = np.array(fitness)
-        index = np.random.choice(POP_SIZE, size=POP_SIZE, replace=True, p=fitness / sum(fitness))
-        temp = []
-        for i in range(POP_SIZE):
-            temp.append(pop[index[i]])
-        return temp
-
-    def crossover(pop, parent):
-        """crossover the parents to generate offspring"""
-        # choose an individual from the population to crossover
-        index = np.random.randint(0, POP_SIZE - 1)
-        # choose a crossover point
-        point = np.random.randint(1, DNA_SIZE - 1)
-
-        crossover_result = []
-
-        for i in range(node_num):
-            crossover_result.append([])
-            crossover_result[i].extend(parent[i][:point])
-            crossover_result[i].extend(pop[index][i][point:])
-            np.random.shuffle(crossover_result[i])
-
-        return crossover_result
-
-    def mutate(child):
-        """mutation operator"""
-        child = np.array(child)
-        sup = np.max(child)
-        inf = np.min(child)
-        interval = sup - inf
-
-        # mutation process
-        for i in range(DNA_SIZE):
-            if np.random.rand() < MUTATION_RATE:
-                point = i
-                child = point + interval / (1+ child) + point * np.random.rand(node_num, node_num)
-
-        return child
+    max_fitness = eva.max_fitness
+    best_ind = eva.best_ind
 
     """initialize the population and the population's position"""
     pop = []
@@ -388,7 +284,7 @@ if __name__ == '__main__':
                 pop_pos[i][j] = popGame.node_list[j].position
 
             # get the fitness of the population
-            fitness[i] = get_fitness(pop_pos[i])
+            fitness[i] = EVA.get_fitness(pop_pos[i], node_num)
 
             # record the best individual
             if fitness[i] > max_fitness:
@@ -402,13 +298,13 @@ if __name__ == '__main__':
 
         # chosse the parent based on fitness
         popCopy = pop.copy()
-        pop = select_parent(pop, fitness)
+        pop = EVA.select_parent(pop, fitness)
 
         for popIndex in range(POP_SIZE):
             parent = pop[popIndex]
             # single-point crossover
-            child = crossover(popCopy, parent)
-            child = mutate(child)
+            child = EVA.crossover(popCopy, parent)
+            child = EVA.mutate(child)
 
             # survival selection, use age-based replacement
             # the number of parents and children is the same, so all children are replaced with parents
@@ -427,8 +323,7 @@ if __name__ == '__main__':
         if record and gen % record_interval == 0:
             pop_data = pop.copy()
             temp_data = np.array(pop_data)
-            np.save(file="data.npy", arr=temp_data)           
-
+            np.save(file="data.npy", arr=temp_data)
 
     # print the best individual
     np.savetxt('individual.csv', best_ind, delimiter=',')
