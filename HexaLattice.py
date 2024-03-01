@@ -275,8 +275,7 @@ if __name__ == '__main__':
         fitness = np.array([ind_fitness for ind_fitness in map(EVA.get_fitness, pop_pos)])
 
         # plot the fitness of the population
-        x = np.ones(POP_SIZE) * gen
-        ax.scatter(x, fitness, c='r', s=10)
+        ax.scatter(np.ones(POP_SIZE) * gen, fitness, c='r', s=10)
         plt.draw()
         plt.pause(0.01)
 
@@ -313,4 +312,4 @@ if __name__ == '__main__':
     # print("Best individual: ", best_ind)
     print("Best Fitness: ", max_fitness)
 
-    # plt.show()
+    plt.show()
