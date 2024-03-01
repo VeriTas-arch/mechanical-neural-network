@@ -3,13 +3,15 @@ import pygame
 import pymunk
 import pymunk.pygame_util
 import math
+import EVA
+
 import numpy as np
+import matplotlib.pyplot as plt
 
 from settings import Settings
 from beam import Beam
 from node import Node
 from operations import Operations
-import EVA
 from time import sleep
 from tqdm import tqdm
 
@@ -17,7 +19,7 @@ from tqdm import tqdm
 class HexaLattice:
     """Main class for HexaLattice simulation"""
 
-    def __init__(self, stiffness):
+    def __init__(self, stiffness_mat):
         # initialize pygame
         pygame.init()
         self.clock = pygame.time.Clock()
@@ -27,6 +29,7 @@ class HexaLattice:
         pygame.display.set_caption("Mechanical Neural Network")
         self.step_counter = 0
         self.step_interval = 50
+        self.step = self.settings.step
 
         # initialize pymunk
         self.space = pymunk.Space()
@@ -39,17 +42,13 @@ class HexaLattice:
         self.operations = Operations(self)
 
         # initialize the lists
-        self.node_list = []
+        self.node_list = [None for i in range(self.settings.length)]
         self.beam_list = []
-        self.init_pos = []
-        self.dynamic_pos = []
-        self.node_record = []
+        self.init_pos = [None for i in range(self.settings.length)]
+        # self.dynamic_pos = []
+        self.node_record = [None for i in range(self.settings.length)]
 
         for i in range(self.settings.length):
-            self.node_list.append(None)
-            self.node_record.append(None)
-            self.init_pos.append((0, 0))
-            self.dynamic_pos.append((0, 0))
             self.beam_list.append([])
 
             for j in range(self.settings.length):
@@ -70,15 +69,15 @@ class HexaLattice:
         """Main game loop"""
         # while self.running:
         for _ in range(self.step_interval):
-            self._check_events()
+            # self._check_events()
             self._update_screen()
-            self._check_stability()
-            self.step_counter += 1
-            self.space.step(1)
+            # self._check_stability()
+            # self.step_counter += 1
+            self.space.step(self.step)
             self.clock.tick(self.settings.fps)
 
             # record the dynamic position of the nodes
-            self._update_pos()
+            # self._update_pos()
 
     def _check_events(self):
         """Respond to user input"""
@@ -92,8 +91,7 @@ class HexaLattice:
         self.space.debug_draw(self.draw_option)
 
         # apply force to the nodes
-        body_1 = self.node_list[0]
-        body_2 = self.node_list[1]
+        body_1, body_2 = self.node_list[0], self.node_list[1]
         (force_1_x, force_1_y) = self.settings.force_1
         (force_2_x, force_2_y) = self.settings.force_2
         self.operations.add_force(body_1, force_1_x, force_1_y)
@@ -162,7 +160,7 @@ class HexaLattice:
             if (i + 1) % T == 0 or (i + 1) % T == self.row_lenh + 1:
                 self.node_record[i] = self.node.add_static_node(space, radius, (pos_x, pos_y))
                 self.node_list[i] = self.node_record[i][0]
-                
+
             else:
                 self.node_record[i] = self.node.add_float_node(space, radius, mass, (pos_x, pos_y))
                 self.node_list[i] = self.node_record[i][0]
@@ -176,11 +174,11 @@ class HexaLattice:
         radius = self.settings.node_radius
         mass = self.settings.float_node_mass
 
-        for i in range (self.length):
+        for i in range(self.length):
             if (i + 1) % T != 0 and (i + 1) % T != self.row_lenh + 1:
                 self.node_record[i] = self.node.add_float_node(space, radius, mass, self.init_pos[i])
                 self.node_list[i] = self.node_record[i][0]
-                self.dynamic_pos[i] = self.init_pos[i]
+                # self.dynamic_pos[i] = self.init_pos[i]
 
     def _delete_float_nodes(self):
         """function that removes the float nodes"""
@@ -230,7 +228,6 @@ class HexaLattice:
 
 if __name__ == '__main__':
     """define the EVA functions and initialize the parameters"""
-
     set = Settings()
     eva = EVA.Eva()
 
@@ -241,21 +238,14 @@ if __name__ == '__main__':
     max_fitness = eva.max_fitness
     best_ind = eva.best_ind
 
-
     """initialize the population and the population's position"""
-    pop = []
-    new_pop = []
+    pop = np.random.rand(POP_SIZE, node_num, node_num) * 20
     # store the positions of nodes in each individual
     pop_pos = []
     # store the fitness of each individual
-    fitness = []
+    fitness = np.zeros(POP_SIZE)
 
     for i in range(POP_SIZE):
-        # generate a random stiffness matrix as the initial population
-        stiffness_mat = np.random.rand(node_num, node_num) * 20
-        pop.append(stiffness_mat)
-
-        fitness.append(0)
         pop_pos.append([])
         for j in range(node_num):
             pop_pos[i].append(None)
@@ -267,10 +257,15 @@ if __name__ == '__main__':
         pop = stiffness_data
 
     init_stiffness = np.random.rand(node_num, node_num) * 20
-    # the population that is to be evolved, whose individuals are HexaLattice objects
     popGame = HexaLattice(init_stiffness)
-    popGame.run_game()
+
     print("\nEvolution starts")
+
+    """initialize the plot"""
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    plt.ion()
 
     """evolution process"""
     for gen in tqdm(range(N_GENERATIONS), colour='red', desc='EVA', dynamic_ncols=True):
@@ -281,11 +276,15 @@ if __name__ == '__main__':
             popGame._reset_game(pop[i])
             popGame.run_game()
 
-            for j in range(node_num):
-                pop_pos[i][j] = popGame.node_list[j].position
+            pop_pos[i] = [popGame.node_list[j].position for j in range(node_num)]
 
             # get the fitness of the population
-            fitness[i] = EVA.get_fitness(pop_pos[i],node_num)
+            fitness[i] = EVA.get_fitness(pop_pos[i], node_num)
+
+            # draw the fitness dots
+            ax.scatter(gen, fitness[i], c='r', s=10)
+            plt.draw()
+            plt.pause(0.01)
 
             # record the best individual
             if fitness[i] > max_fitness:
@@ -293,42 +292,36 @@ if __name__ == '__main__':
                 best_ind = pop[i].copy()
                 print(f"\nthe current best fitness is {max_fitness}")
 
-            # sort the population based on fitness
-            sort_fitness = np.argsort(fitness)
-            pop_fitness = [pop[i] for i in sort_fitness]
+        # sort the population based on fitness
+        sort_fitness = np.argsort(fitness)
+        pop_fitness = [pop[i] for i in sort_fitness]
 
         # chosse the parent based on fitness
-        popCopy = pop.copy()
         pop = EVA.select_parent(pop, fitness)
-
-        for popIndex in range(POP_SIZE):
-            parent = pop[popIndex]
-            # single-point crossover
-            child = EVA.crossover(popCopy, parent)
-            child = EVA.mutate(child)
-
-            # survival selection, use age-based replacement
-            # the number of parents and children is the same, so all children are replaced with parents
-            pop[popIndex] = child
+        popCopy = pop.copy()
+        pop = [EVA.process(popCopy, pop[popIndex]) for popIndex in range(POP_SIZE)]
 
         # create the new population
         fit_point = np.random.choice(POP_SIZE, p=sort_fitness / sum(sort_fitness))
-        new_pop = pop[:fit_point]
-        new_pop.extend(pop_fitness[fit_point:])
-        pop = new_pop.copy()
+        pop = pop[:fit_point]
+        pop.extend(pop_fitness[fit_point:])
 
         sleep(0.01)
 
         """RECORD the last generation"""
         record = set.record
         if record and gen % record_interval == 0:
-            pop_data = pop.copy()
-            temp_data = np.array(pop_data)
-            np.save(file="data.npy", arr=temp_data)           
-
+            temp_data = np.array(pop)
+            np.save(file="data.npy", arr=temp_data)
 
     # print the best individual
     np.savetxt('individual.csv', best_ind, delimiter=',')
 
-    print("Best individual: ", best_ind)
-    print("Fitness: ", max_fitness)
+    # print("Best individual: ", best_ind)
+    print("Best Fitness: ", max_fitness)
+
+    plt.ioff()
+    plt.xlabel('Generation')
+    plt.ylabel('Fitness')
+    plt.title('EVA')
+    plt.show()

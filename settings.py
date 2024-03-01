@@ -9,6 +9,7 @@ class Settings:
         self.fps = 120
         self.bg_color = (230, 230, 230)
         self.gravity = (0, 0)
+        self.step = 1
 
         # the number of the first row
         self.row_lenh = 2
@@ -43,8 +44,8 @@ class Settings:
 
         self.POP_SIZE = 3
         self.DNA_SIZE = self.length
-        self.N_GENERATIONS = 5
-        self.MUTATION_RATE = 0.01
+        self.N_GENERATIONS = 10
+        self.MUTATION_RATE = 0.05
 
         # stability analysis settings
         self.stability_bias = 1e-30
@@ -52,5 +53,5 @@ class Settings:
 
         # resume and record settings
         self.resume = False
-        self.record = True
+        self.record = False
         self.record_interval = 100
