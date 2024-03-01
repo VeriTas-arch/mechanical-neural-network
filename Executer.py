@@ -21,7 +21,8 @@ class HexaLattice:
         self.clock = pygame.time.Clock()
         self.settings = Settings()
         self.screen = pygame.display.set_mode(
-            (self.settings.screen_width, self.settings.screen_height))
+            (self.settings.screen_width, self.settings.screen_height)
+        )
         pygame.display.set_caption("Mechanical Neural Network")
         self.step_counter = 0
 
@@ -109,17 +110,20 @@ class HexaLattice:
                     if j == i + n or j == i + n + 1 or j == i + 2 * n + 1:
                         notion_mat[i][j] = 1
                         self.beam_list[i][j] = self.beam.add_beam(
-                            self.node_list[i], self.node_list[j], stiffness_mat[i][j])
+                            self.node_list[i], self.node_list[j], stiffness_mat[i][j]
+                        )
 
                 elif i % (2 * n + 1) == n and j == i + n + 1:
                     notion_mat[i][j] = 1
                     self.beam_list[i][j] = self.beam.add_beam(
-                        self.node_list[i], self.node_list[j], stiffness_mat[i][j])
+                        self.node_list[i], self.node_list[j], stiffness_mat[i][j]
+                    )
 
-                elif i % (2 * n + 1) == 2*n and j == i + n:
+                elif i % (2 * n + 1) == 2 * n and j == i + n:
                     notion_mat[i][j] = 1
                     self.beam_list[i][j] = self.beam.add_beam(
-                        self.node_list[i], self.node_list[j], stiffness_mat[i][j])
+                        self.node_list[i], self.node_list[j], stiffness_mat[i][j]
+                    )
 
         # print(notion_mat)
         return notion_mat
@@ -130,8 +134,10 @@ class HexaLattice:
         radius = self.settings.node_radius
         mass = self.settings.float_node_mass
 
-        sep_x = (self.settings.screen_width - (self.row_lenh - 1) * blen * math.sqrt(3))/2
-        sep_y = (self.settings.screen_height - ((self.row_num - 1)/2) * blen)/2
+        sep_x = (
+            self.settings.screen_width - (self.row_lenh - 1) * blen * math.sqrt(3)
+        ) / 2
+        sep_y = (self.settings.screen_height - ((self.row_num - 1) / 2) * blen) / 2
 
         n = self.row_lenh
         T = 2 * n + 1
@@ -151,21 +157,29 @@ class HexaLattice:
                 pos_y = sep_y + row_counter * blen / 2
 
             if column_counter >= n and column_counter < T:
-                pos_x = sep_x + (column_counter - n) * blen * math.sqrt(3) - blen * math.sqrt(3) / 2
+                pos_x = (
+                    sep_x
+                    + (column_counter - n) * blen * math.sqrt(3)
+                    - blen * math.sqrt(3) / 2
+                )
                 pos_y = sep_y + row_counter * blen / 2
             column_counter += 1
 
             if (i + 1) % T == 0 or (i + 1) % T == self.row_lenh + 1:
-                self.node_record[i] = self.node.add_static_node(space, radius, (pos_x, pos_y))
+                self.node_record[i] = self.node.add_static_node(
+                    space, radius, (pos_x, pos_y)
+                )
                 self.node_list[i] = self.node_record[i][0]
             else:
-                self.node_record[i] = self.node.add_float_node(space, radius, mass, (pos_x, pos_y))
+                self.node_record[i] = self.node.add_float_node(
+                    space, radius, mass, (pos_x, pos_y)
+                )
                 self.node_list[i] = self.node_record[i][0]
 
             self.init_pos[i] = (pos_x, pos_y)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # read the stiffness matrix from the csv file
     path = Path(__file__).parent / "individual.csv"
     stiffness_mat = np.loadtxt(open(path, "rb"), delimiter=",", skiprows=0)

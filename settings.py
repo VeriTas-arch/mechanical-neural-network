@@ -16,7 +16,9 @@ class Settings:
         # row_num should be an odd number
         self.row_num = 5
         # the length of the node list
-        self.length = int((2 * self.row_lenh + 1) * (self.row_num - 1)/2 + self.row_lenh)
+        self.length = int(
+            (2 * self.row_lenh + 1) * (self.row_num - 1) / 2 + self.row_lenh
+        )
 
         # force settings
         self.force_1 = (0, 50)

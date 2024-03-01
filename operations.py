@@ -15,15 +15,12 @@ class Operations:
 
     def add_force(self, body, force_vector_x, force_vector_y):
         """function that adds a instantaneous force to the object"""
-        body.apply_force_at_local_point(
-            (force_vector_x, force_vector_y), (0, 0))
+        body.apply_force_at_local_point((force_vector_x, force_vector_y), (0, 0))
 
-    def draw_arrow(self, start_pos, end_pos,
-                   color=(255, 0, 0), thickness=5):
+    def draw_arrow(self, start_pos, end_pos, color=(255, 0, 0), thickness=5):
         """function that draws an arrow, finished by ChatGPT"""
         # calculate the angle and length of the arrow
-        angle = math.atan2(end_pos[1] - start_pos[1],
-                           end_pos[0] - start_pos[0])
+        angle = math.atan2(end_pos[1] - start_pos[1], end_pos[0] - start_pos[0])
 
         # create the arrow line
         pygame.draw.line(self.screen, color, start_pos, end_pos, thickness)
@@ -33,13 +30,27 @@ class Operations:
         arrow_head_y = end_pos[1] - self.arrow_head_length * math.sin(angle)
 
         # calculate the coordinates of the arrow head's left and right points
-        arrow_head_left_x = arrow_head_x + self.arrow_head_width * math.cos(angle + math.pi / 2)
-        arrow_head_left_y = arrow_head_y + self.arrow_head_width * math.sin(angle + math.pi / 2)
+        arrow_head_left_x = arrow_head_x + self.arrow_head_width * math.cos(
+            angle + math.pi / 2
+        )
+        arrow_head_left_y = arrow_head_y + self.arrow_head_width * math.sin(
+            angle + math.pi / 2
+        )
 
-        arrow_head_right_x = arrow_head_x + self.arrow_head_width * math.cos(angle - math.pi / 2)
-        arrow_head_right_y = arrow_head_y + self.arrow_head_width * math.sin(angle - math.pi / 2)
+        arrow_head_right_x = arrow_head_x + self.arrow_head_width * math.cos(
+            angle - math.pi / 2
+        )
+        arrow_head_right_y = arrow_head_y + self.arrow_head_width * math.sin(
+            angle - math.pi / 2
+        )
 
         # draw the arrow head
-        pygame.draw.polygon(self.screen, color, (end_pos,
-                            (arrow_head_left_x, arrow_head_left_y),
-                            (arrow_head_right_x, arrow_head_right_y)))
+        pygame.draw.polygon(
+            self.screen,
+            color,
+            (
+                end_pos,
+                (arrow_head_left_x, arrow_head_left_y),
+                (arrow_head_right_x, arrow_head_right_y),
+            ),
+        )

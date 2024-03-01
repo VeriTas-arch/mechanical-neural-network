@@ -27,8 +27,8 @@ def target_function():
     """set sine function as target function"""
     # define the constants
     blen = set.beam_length
-    sep_x = (set.screen_width - (set.row_lenh - 1) * blen * math.sqrt(3))/2
-    sep_y = (set.screen_height - ((set.row_num - 1)/2) * blen)/2
+    sep_x = (set.screen_width - (set.row_lenh - 1) * blen * math.sqrt(3)) / 2
+    sep_y = (set.screen_height - ((set.row_num - 1) / 2) * blen) / 2
 
     # define the sine function related parameters
     T = set.beam_length * 2 * math.sqrt(3) * 1.02
@@ -36,13 +36,13 @@ def target_function():
     Amp = set.beam_length / 25
     # bias = set.beam_length * 0.65
     bias = set.screen_height - sep_y + 7
-    return lambda x: Amp * math.sin(omiga * (x - sep_x) + math.pi/2) + bias
+    return lambda x: Amp * math.sin(omiga * (x - sep_x) + math.pi / 2) + bias
 
 
 def avoid_function_lin():
     """set the function that the input nodes should avoid"""
     # type1 linear function
-    sep_y = (set.screen_height - ((set.row_num - 1)/2) * set.beam_length)/2
+    sep_y = (set.screen_height - ((set.row_num - 1) / 2) * set.beam_length) / 2
     Amp = set.beam_length / 2
     bias = Amp / 3
     return lambda x: sep_y + bias
@@ -84,7 +84,9 @@ def get_fitness(indPos):
 
 def select_parent(pop, fitness):
     """choose the parent based on fitness"""
-    index = np.random.choice(POP_SIZE, size=POP_SIZE, replace=True, p=fitness / sum(fitness))
+    index = np.random.choice(
+        POP_SIZE, size=POP_SIZE, replace=True, p=fitness / sum(fitness)
+    )
     temp = [pop[index[i]] for i in range(POP_SIZE)]
 
     return temp
@@ -96,7 +98,10 @@ def crossover(pop, parent):
     index = np.random.randint(0, POP_SIZE - 1)
     # choose a crossover point
     point = np.random.randint(1, DNA_SIZE - 1)
-    crossover_result = [np.concatenate((parent[i][:point], pop[index][i][point:])) for i in range(node_num)]
+    crossover_result = [
+        np.concatenate((parent[i][:point], pop[index][i][point:]))
+        for i in range(node_num)
+    ]
 
     return crossover_result
 
@@ -110,7 +115,11 @@ def mutate(child):
     for i in range(DNA_SIZE):
         if np.random.rand() < MUTATION_RATE:
             point = i
-            child = point + interval / (1 + child) + point * np.random.rand(node_num, node_num)
+            child = (
+                point
+                + interval / (1 + child)
+                + point * np.random.rand(node_num, node_num)
+            )
 
     return child
 

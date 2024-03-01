@@ -25,7 +25,8 @@ class HexaLattice:
         self.clock = pygame.time.Clock()
         self.settings = Settings()
         self.screen = pygame.display.set_mode(
-            (self.settings.screen_width, self.settings.screen_height))
+            (self.settings.screen_width, self.settings.screen_height)
+        )
         pygame.display.set_caption("Mechanical Neural Network")
         self.step_counter = 0
         self.step_interval = 50
@@ -74,7 +75,7 @@ class HexaLattice:
             # self._check_stability()
             # self.step_counter += 1
             self.space.step(self.step)
-            self.clock.tick(self.settings.fps) 
+            self.clock.tick(self.settings.fps)
 
             # record the dynamic position of the nodes
             # self._update_pos()
@@ -111,17 +112,20 @@ class HexaLattice:
                     if j == i + n or j == i + n + 1 or j == i + 2 * n + 1:
                         # notion_mat[i][j] = 1
                         self.beam_list[i][j] = self.beam.add_beam(
-                            self.node_list[i], self.node_list[j], stiffness_mat[i][j])
+                            self.node_list[i], self.node_list[j], stiffness_mat[i][j]
+                        )
 
                 elif i % (2 * n + 1) == n and j == i + n + 1:
                     # notion_mat[i][j] = 1
                     self.beam_list[i][j] = self.beam.add_beam(
-                        self.node_list[i], self.node_list[j], stiffness_mat[i][j])
+                        self.node_list[i], self.node_list[j], stiffness_mat[i][j]
+                    )
 
-                elif i % (2 * n + 1) == 2*n and j == i + n:
+                elif i % (2 * n + 1) == 2 * n and j == i + n:
                     # notion_mat[i][j] = 1
                     self.beam_list[i][j] = self.beam.add_beam(
-                        self.node_list[i], self.node_list[j], stiffness_mat[i][j])
+                        self.node_list[i], self.node_list[j], stiffness_mat[i][j]
+                    )
 
         # print(notion_mat)
         # return notion_mat
@@ -132,8 +136,10 @@ class HexaLattice:
         radius = self.settings.node_radius
         mass = self.settings.float_node_mass
 
-        sep_x = (self.settings.screen_width - (self.row_lenh - 1) * blen * math.sqrt(3))/2
-        sep_y = (self.settings.screen_height - ((self.row_num - 1)/2) * blen)/2
+        sep_x = (
+            self.settings.screen_width - (self.row_lenh - 1) * blen * math.sqrt(3)
+        ) / 2
+        sep_y = (self.settings.screen_height - ((self.row_num - 1) / 2) * blen) / 2
 
         n = self.row_lenh
         T = 2 * n + 1
@@ -153,16 +159,24 @@ class HexaLattice:
                 pos_y = sep_y + row_counter * blen / 2
 
             if column_counter >= n and column_counter < T:
-                pos_x = sep_x + (column_counter - n) * blen * math.sqrt(3) - blen * math.sqrt(3) / 2
+                pos_x = (
+                    sep_x
+                    + (column_counter - n) * blen * math.sqrt(3)
+                    - blen * math.sqrt(3) / 2
+                )
                 pos_y = sep_y + row_counter * blen / 2
             column_counter += 1
 
             if (i + 1) % T == 0 or (i + 1) % T == self.row_lenh + 1:
-                self.node_record[i] = self.node.add_static_node(space, radius, (pos_x, pos_y))
+                self.node_record[i] = self.node.add_static_node(
+                    space, radius, (pos_x, pos_y)
+                )
                 self.node_list[i] = self.node_record[i][0]
 
             else:
-                self.node_record[i] = self.node.add_float_node(space, radius, mass, (pos_x, pos_y))
+                self.node_record[i] = self.node.add_float_node(
+                    space, radius, mass, (pos_x, pos_y)
+                )
                 self.node_list[i] = self.node_record[i][0]
 
             self.init_pos[i] = (pos_x, pos_y)
@@ -176,14 +190,19 @@ class HexaLattice:
 
         for i in range(self.length):
             if (i + 1) % T != 0 and (i + 1) % T != self.row_lenh + 1:
-                self.node_record[i] = self.node.add_float_node(space, radius, mass, self.init_pos[i])
+                self.node_record[i] = self.node.add_float_node(
+                    space, radius, mass, self.init_pos[i]
+                )
                 self.node_list[i] = self.node_record[i][0]
                 # self.dynamic_pos[i] = self.init_pos[i]
 
     def _delete_float_nodes(self):
         """function that removes the float nodes"""
         for i in range(self.length):
-            if self.node_list[i] is not None and self.node_list[i].body_type == pymunk.Body.DYNAMIC:
+            if (
+                self.node_list[i] is not None
+                and self.node_list[i].body_type == pymunk.Body.DYNAMIC
+            ):
                 self.space.remove(self.node_record[i][0])
                 self.space.remove(self.node_record[i][1])
                 self.node_list[i] = None
@@ -206,7 +225,10 @@ class HexaLattice:
 
         rms = math.sqrt(bias / self.length)
 
-        if rms < self.settings.stability_bias and self.step_counter > self.settings.stability_inf:
+        if (
+            rms < self.settings.stability_bias
+            and self.step_counter > self.settings.stability_inf
+        ):
             self.running = False
         return True
 
@@ -226,7 +248,7 @@ class HexaLattice:
         self.running = True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """define the EVA functions and initialize the parameters"""
     set = Settings()
     eva = EVA.Eva()
@@ -262,7 +284,7 @@ if __name__ == '__main__':
     print("\nEvolution starts")
 
     """evolution process"""
-    for gen in tqdm(range(N_GENERATIONS), colour='red', desc='EVA', dynamic_ncols=True):
+    for gen in tqdm(range(N_GENERATIONS), colour="red", desc="EVA", dynamic_ncols=True):
 
         # calculate the fitness of the current generation
         for i in range(POP_SIZE):

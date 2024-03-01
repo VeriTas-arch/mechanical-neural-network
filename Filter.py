@@ -25,7 +25,8 @@ class HexaLattice:
         self.clock = pygame.time.Clock()
         self.settings = Settings()
         self.screen = pygame.display.set_mode(
-            (self.settings.screen_width, self.settings.screen_height))
+            (self.settings.screen_width, self.settings.screen_height)
+        )
         pygame.display.set_caption("Mechanical Neural Network")
 
         # initialize pymunk
@@ -75,9 +76,9 @@ class HexaLattice:
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111)
 
-        self.ax.set_xlabel('Step')
-        self.ax.set_ylabel('Fitness')
-        self.ax.set_title('Fitness Curve')
+        self.ax.set_xlabel("Step")
+        self.ax.set_ylabel("Fitness")
+        self.ax.set_title("Fitness Curve")
         # plt.ion()
 
         self.running = True
@@ -119,8 +120,10 @@ class HexaLattice:
 
     def _init_pos(self):
         """calculate the initial position of the nodes"""
-        sep_x = (self.settings.screen_width - (self.row_lenh - 1) * self.blen * math.sqrt(3))/2
-        sep_y = (self.settings.screen_height - ((self.row_num - 1)/2) * self.blen)/2
+        sep_x = (
+            self.settings.screen_width - (self.row_lenh - 1) * self.blen * math.sqrt(3)
+        ) / 2
+        sep_y = (self.settings.screen_height - ((self.row_num - 1) / 2) * self.blen) / 2
 
         n = self.row_lenh
         column_counter = 0
@@ -135,7 +138,11 @@ class HexaLattice:
                 pos_x = sep_x + column_counter * self.blen * math.sqrt(3)
                 pos_y = sep_y + row_counter * self.blen / 2
             else:
-                pos_x = sep_x + (column_counter - n) * self.blen * math.sqrt(3) - self.blen * math.sqrt(3) / 2
+                pos_x = (
+                    sep_x
+                    + (column_counter - n) * self.blen * math.sqrt(3)
+                    - self.blen * math.sqrt(3) / 2
+                )
                 pos_y = sep_y + row_counter * self.blen / 2
 
             column_counter += 1
@@ -145,9 +152,13 @@ class HexaLattice:
         """function that initializes the nodes"""
         for i in range(self.length):
             if (i + 1) % self.T == 0 or (i + 1) % self.T == self.row_lenh + 1:
-                self.node_record[i] = self.node.add_static_node(space, self.radius, self.init_pos[i])
+                self.node_record[i] = self.node.add_static_node(
+                    space, self.radius, self.init_pos[i]
+                )
             else:
-                self.node_record[i] = self.node.add_float_node(space, self.radius, self.mass, self.init_pos[i])
+                self.node_record[i] = self.node.add_float_node(
+                    space, self.radius, self.mass, self.init_pos[i]
+                )
 
             self.node_list[i] = self.node_record[i][0]
 
@@ -162,17 +173,20 @@ class HexaLattice:
                     if j == i + n or j == i + n + 1 or j == i + 2 * n + 1:
                         # notion_mat[i][j] = 1
                         self.beam_list[i][j] = self.beam.add_beam(
-                            self.node_list[i], self.node_list[j], stiffness_mat[i][j])
+                            self.node_list[i], self.node_list[j], stiffness_mat[i][j]
+                        )
 
                 elif i % (2 * n + 1) == n and j == i + n + 1:
                     # notion_mat[i][j] = 1
                     self.beam_list[i][j] = self.beam.add_beam(
-                        self.node_list[i], self.node_list[j], stiffness_mat[i][j])
+                        self.node_list[i], self.node_list[j], stiffness_mat[i][j]
+                    )
 
-                elif i % (2 * n + 1) == 2*n and j == i + n:
+                elif i % (2 * n + 1) == 2 * n and j == i + n:
                     # notion_mat[i][j] = 1
                     self.beam_list[i][j] = self.beam.add_beam(
-                        self.node_list[i], self.node_list[j], stiffness_mat[i][j])
+                        self.node_list[i], self.node_list[j], stiffness_mat[i][j]
+                    )
 
         # print(notion_mat)
         # return notion_mat
@@ -181,14 +195,19 @@ class HexaLattice:
         """function that initializes the float nodes"""
         for i in range(self.length):
             if (i + 1) % self.T != 0 and (i + 1) % self.T != self.row_lenh + 1:
-                self.node_record[i] = self.node.add_float_node(space, self.radius, self.mass, self.init_pos[i])
+                self.node_record[i] = self.node.add_float_node(
+                    space, self.radius, self.mass, self.init_pos[i]
+                )
                 self.node_list[i] = self.node_record[i][0]
                 # self.dynamic_pos[i] = self.init_pos[i]
 
     def _delete_float_nodes(self):
         """function that removes the float nodes"""
         for i in range(self.length):
-            if self.node_list[i] is not None and self.node_list[i].body_type == pymunk.Body.DYNAMIC:
+            if (
+                self.node_list[i] is not None
+                and self.node_list[i].body_type == pymunk.Body.DYNAMIC
+            ):
                 self.space.remove(self.node_record[i][0])
                 self.space.remove(self.node_record[i][1])
                 self.node_list[i] = None
@@ -211,7 +230,10 @@ class HexaLattice:
 
         rms = math.sqrt(bias / self.length)
 
-        if rms < self.settings.stability_bias and self.step_counter > self.settings.stability_inf:
+        if (
+            rms < self.settings.stability_bias
+            and self.step_counter > self.settings.stability_inf
+        ):
             self.running = False
         return True
 
@@ -236,12 +258,12 @@ class HexaLattice:
         """calculate the fitness"""
         fitness = EVA.get_fitness(self.dynamic_pos)
         # print("the fitness is:", EVA.get_fitness(pop_pos))
-        self.ax.scatter(self.step_counter, fitness, c='r', s=10)
+        self.ax.scatter(self.step_counter, fitness, c="r", s=10)
         plt.draw()
         plt.pause(0.01)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # read the stiffness matrix from the csv file
     path = Path(__file__).parent / "individual.csv"
     stiffness_mat = np.loadtxt(open(path, "rb"), delimiter=",", skiprows=0)
