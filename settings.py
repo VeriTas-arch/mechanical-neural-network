@@ -6,9 +6,10 @@ class Settings:
         # screen settings
         self.screen_width = 720
         self.screen_height = 540
-        self.fps = 120
+        self.fps = 60
         self.bg_color = (230, 230, 230)
         self.gravity = (0, 0)
+        self.step = 1
 
         # the number of the first row
         self.row_lenh = 2
@@ -41,7 +42,7 @@ class Settings:
         self.pop_length = int(self.length * (self.length - 1) / 2)
         self.scale_factor = 10
 
-        self.POP_SIZE = 200
+        self.POP_SIZE = 3
         self.DNA_SIZE = self.length
         self.N_GENERATIONS = 10
         self.MUTATION_RATE = 0.05

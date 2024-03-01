@@ -1,37 +1,15 @@
-import matplotlib.pyplot as plt
-import numpy as np
+import multiprocessing as mp
  
-# 创建空的图形对象
-fig = plt.figure()
-ax = fig.add_subplot(111)
+def job(a,d):
+    filter = [0,1,2,3,4,5,6,7,8,9]
+    fitness = a*d
+    
+    print(fitness)
+    
+    print(filter[a])
+    print('aaaaa')
  
-# 初始化数据列表
-x = []
-y = []
-
-plt.ion()
-plt.show()
-
-for i in range(10):
-    # 模拟生成随机数作为 x、y 值
-    random_x = np.random.rand(10, 1)
-    random_y = np.random.rand(10, 1)
-    
-    # 将新生成的点添加到数据列表中
-    x.append(random_x)
-    y.append(random_y)
-    
-    # 清除之前的所有点并重新绘制
-    ax.clear()
-    ax.scatter(x, y)
-    plt.xlabel('Generation')
-    plt.ylabel('Fitness')
-    plt.title('EVA')
-    
-    # 更新图像显示
-    plt.draw()
-    plt.pause(0.2)
-
-plt.ioff()
-
-plt.show()
+if __name__=='__main__':
+    p1 = mp.Process(target=job,args=(1,2))
+    p1.start()
+    p1.join()

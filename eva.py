@@ -87,9 +87,7 @@ def select_parent(pop, fitness):
     """choose the parent based on fitness"""
     fitness = np.array(fitness)
     index = np.random.choice(POP_SIZE, size=POP_SIZE, replace=True, p=fitness / sum(fitness))
-    temp = []
-    for i in range(POP_SIZE):
-        temp.append(pop[index[i]])
+    temp = [pop[index[i]] for i in range(POP_SIZE)]
 
     return temp
 
@@ -128,3 +126,11 @@ def mutate(child):
             child = point + interval / (1 + child) + point * np.random.rand(node_num, node_num)
 
     return child
+
+
+def process(pop, parent):
+    """process the population with crossover and mutation"""
+    offspring = crossover(pop, parent)
+    offspring = mutate(offspring)
+
+    return offspring
