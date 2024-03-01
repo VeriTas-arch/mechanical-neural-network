@@ -71,6 +71,7 @@ def get_fitness(indPos, num):
         # print(f"node {num - i - 1} position: {indPos[num - i - 1]}")
         # print(f"target {num - i - 1}: {target(indPos[num - i - 1][0])}")
         # print(f"reference position: {indPos[7]}")
+
         bias_out = (target(indPos[num - i - 1][0]) - indPos[num - i - 1][1]) ** 2
         # sum_input += bias_in
         sum_output += bias_out
@@ -100,10 +101,9 @@ def crossover(pop, parent):
     point = np.random.randint(1, DNA_SIZE - 1)
     # point = 6
 
-    crossover_result = []
+    crossover_result = [None for i in range(node_num)]
 
     for i in range(node_num):
-        crossover_result.append([])
         crossover_result[i].extend(parent[i][:point])
         crossover_result[i].extend(pop[index][i][point:])
         if index < np.random.rand() * POP_SIZE:

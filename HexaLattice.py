@@ -3,12 +3,10 @@ import pygame
 import pymunk
 import pymunk.pygame_util
 import math
-import threading
 import EVA
 
 import numpy as np
 import matplotlib.pyplot as plt
-import multiprocessing as mp
 
 from settings import Settings
 from beam import Beam
@@ -313,8 +311,7 @@ if __name__ == '__main__':
         """RECORD the last generation"""
         record = set.record
         if record and gen % record_interval == 0:
-            pop_data = pop.copy()
-            temp_data = np.array(pop_data)
+            temp_data = np.array(pop)
             np.save(file="data.npy", arr=temp_data)
 
     # print the best individual
@@ -322,7 +319,7 @@ if __name__ == '__main__':
 
     # print("Best individual: ", best_ind)
     print("Best Fitness: ", max_fitness)
-    
+
     plt.ioff()
     plt.xlabel('Generation')
     plt.ylabel('Fitness')

@@ -6,7 +6,7 @@ class Settings:
         # screen settings
         self.screen_width = 720
         self.screen_height = 540
-        self.fps = 60
+        self.fps = 120
         self.bg_color = (230, 230, 230)
         self.gravity = (0, 0)
         self.step = 1
