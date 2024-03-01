@@ -12,7 +12,6 @@ from settings import Settings
 from beam import Beam
 from node import Node
 from operations import Operations
-from time import sleep
 from pathlib import Path
 
 
@@ -55,7 +54,7 @@ class HexaLattice:
         # execution parameters
         self.stiffness_mat = stiffness_mat
         self.step_counter = 0
-        self.step_interval = 1000
+        self.step_interval = 500
 
         """initialize the lists"""
         self.node_list = [None for i in range(self.length)]
@@ -119,7 +118,7 @@ class HexaLattice:
         # pygame.display.flip()
 
     def _init_pos(self):
-        """calculate the initial position of the nodes""" 
+        """calculate the initial position of the nodes"""
         sep_x = (self.settings.screen_width - (self.row_lenh - 1) * self.blen * math.sqrt(3))/2
         sep_y = (self.settings.screen_height - ((self.row_num - 1)/2) * self.blen)/2
 

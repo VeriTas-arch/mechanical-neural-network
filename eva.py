@@ -63,7 +63,7 @@ def get_fitness(indPos):
     target = target_function()
     # avoid = avoid_function_sin()
     length = set.row_lenh
-    num  = node_num - 1
+    num = node_num - 1
     # sum_input = 0
     sum_output = 0
 

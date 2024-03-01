@@ -9,7 +9,6 @@ from settings import Settings
 from beam import Beam
 from node import Node
 from operations import Operations
-from time import sleep
 from pathlib import Path
 
 
@@ -159,12 +158,12 @@ class HexaLattice:
             if (i + 1) % T == 0 or (i + 1) % T == self.row_lenh + 1:
                 self.node_record[i] = self.node.add_static_node(space, radius, (pos_x, pos_y))
                 self.node_list[i] = self.node_record[i][0]
-                
             else:
                 self.node_record[i] = self.node.add_float_node(space, radius, mass, (pos_x, pos_y))
                 self.node_list[i] = self.node_record[i][0]
 
             self.init_pos[i] = (pos_x, pos_y)
+
 
 if __name__ == '__main__':
     # read the stiffness matrix from the csv file

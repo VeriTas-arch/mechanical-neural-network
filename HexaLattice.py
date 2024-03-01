@@ -109,7 +109,7 @@ class HexaLattice:
         pygame.display.flip()
 
     def _init_pos(self):
-        """calculate the initial position of the nodes""" 
+        """calculate the initial position of the nodes"""
         sep_x = (self.settings.screen_width - (self.row_lenh - 1) * self.blen * math.sqrt(3))/2
         sep_y = (self.settings.screen_height - ((self.row_num - 1)/2) * self.blen)/2
 
@@ -232,10 +232,9 @@ if __name__ == '__main__':
     N_GENERATIONS = set.N_GENERATIONS
     max_fitness = eva.max_fitness
     best_ind = eva.best_ind
-    
+
     resume = set.resume
     record = set.record
-
 
     """initialize the population and the population's position"""
     pop = np.random.rand(POP_SIZE, node_num, node_num) * 20
@@ -244,7 +243,6 @@ if __name__ == '__main__':
     # store the fitness of each individual
     fitness = np.zeros(POP_SIZE)
     pop_pos = np.zeros((POP_SIZE, node_num, 2))
-
 
     """RESUME from the last generation"""
     if resume:
@@ -255,15 +253,12 @@ if __name__ == '__main__':
     popGame = HexaLattice(init_stiffness)
     print("\nEvolution starts")
 
-
     """initialize the plot"""
     fig = plt.figure()
     ax = fig.add_subplot(111)
     plt.xlabel('Generation')
     plt.ylabel('Fitness')
     plt.title('EVA')
-    # plt.ion()
-
 
     """evolution process"""
     for gen in tqdm(range(N_GENERATIONS), colour='red', desc='EVA', dynamic_ncols=True):
@@ -318,5 +313,4 @@ if __name__ == '__main__':
     # print("Best individual: ", best_ind)
     print("Best Fitness: ", max_fitness)
 
-    # plt.ioff()
     plt.show()
