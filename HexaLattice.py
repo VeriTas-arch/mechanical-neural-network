@@ -278,23 +278,25 @@ if __name__ == '__main__':
 
             pop_pos[i] = [popGame.node_list[j].position for j in range(node_num)]
 
-            # get the fitness of the population
-            fitness[i] = EVA.get_fitness(pop_pos[i], node_num)
+        # get the fitness of the population
+        fitness = np.array([ind_fitness for ind_fitness in map(EVA.get_fitness, pop_pos)])
 
-            # draw the fitness dots
-            ax.scatter(gen, fitness[i], c='r', s=10)
-            plt.draw()
-            plt.pause(0.01)
-
-            # record the best individual
-            if fitness[i] > max_fitness:
-                max_fitness = fitness[i]
-                best_ind = pop[i].copy()
-                print(f"\nthe current best fitness is {max_fitness}")
+        # plot the fitness of the population
+        x = np.ones(POP_SIZE) * gen
+        ax.scatter(x, fitness, c='r', s=10)
+        plt.draw()
+        plt.pause(0.01)
 
         # sort the population based on fitness
         sort_fitness = np.argsort(fitness)
-        pop_fitness = [pop[i] for i in sort_fitness]
+        pop_fitness = np.array([pop[i] for i in sort_fitness])
+
+        # record the best individual
+        index = sort_fitness[POP_SIZE - 1]
+        if fitness[index] > max_fitness:
+            max_fitness = fitness[index]
+            best_ind = pop[index]
+            print(f"\nthe current best fitness is {max_fitness}")
 
         # chosse the parent based on fitness
         pop = EVA.select_parent(pop, fitness)
@@ -303,8 +305,7 @@ if __name__ == '__main__':
 
         # create the new population
         fit_point = np.random.choice(POP_SIZE, p=sort_fitness / sum(sort_fitness))
-        pop = pop[:fit_point]
-        pop.extend(pop_fitness[fit_point:])
+        pop = np.concatenate((pop[:fit_point], pop_fitness[fit_point:]))
 
         sleep(0.01)
 
