@@ -6,7 +6,7 @@ class Settings:
         # screen settings
         self.screen_width = 720
         self.screen_height = 540
-        self.fps = 120
+        self.fps = 240
         self.bg_color = (230, 230, 230)
         self.gravity = (0, 0)
         self.step = 1
@@ -42,7 +42,7 @@ class Settings:
         self.pop_length = int(self.length * (self.length - 1) / 2)
         self.scale_factor = 10
 
-        self.POP_SIZE = 10
+        self.POP_SIZE = 50
         self.DNA_SIZE = self.length
         self.N_GENERATIONS = 10
         self.MUTATION_RATE = 0.05
@@ -53,5 +53,5 @@ class Settings:
 
         # resume and record settings
         self.resume = False
-        self.record = False
+        self.record = True
         self.record_interval = 100

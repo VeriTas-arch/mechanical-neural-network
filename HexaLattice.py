@@ -20,6 +20,7 @@ class HexaLattice:
     """Main class for HexaLattice simulation"""
 
     def __init__(self, stiffness_mat):
+        """program initialization"""
         # initialize pygame
         pygame.init()
         self.clock = pygame.time.Clock()
@@ -27,39 +28,47 @@ class HexaLattice:
         self.screen = pygame.display.set_mode(
             (self.settings.screen_width, self.settings.screen_height))
         pygame.display.set_caption("Mechanical Neural Network")
-        self.step_counter = 0
-        self.step_interval = 50
-        self.step = self.settings.step
 
         # initialize pymunk
         self.space = pymunk.Space()
         self.space.gravity = self.settings.gravity
         self.draw_option = pymunk.pygame_util.DrawOptions(self.screen)
 
-        # initialize the objects from the external classes
+        """initialize external classes"""
         self.beam = Beam(self)
         self.node = Node(self)
         self.operations = Operations(self)
 
-        # initialize the lists
-        self.node_list = [None for i in range(self.settings.length)]
-        self.beam_list = []
-        self.init_pos = [None for i in range(self.settings.length)]
-        # self.dynamic_pos = []
-        self.node_record = [None for i in range(self.settings.length)]
-
-        for i in range(self.settings.length):
-            self.beam_list.append([])
-
-            for j in range(self.settings.length):
-                self.beam_list[i].append(None)
-
+        """define the constants"""
+        # simulation parameters
         self.length = self.settings.length
-        self.stiffness_mat = stiffness_mat
+        self.step = self.settings.step
         self.row_lenh = self.settings.row_lenh
         self.row_num = self.settings.row_num
 
+        # node and beam parameters
+        self.blen = self.settings.beam_length
+        self.T = 2 * self.row_lenh + 1
+        self.radius = self.settings.node_radius
+        self.mass = self.settings.float_node_mass
+
+        # execution parameters
+        self.stiffness_mat = stiffness_mat
+        self.step_counter = 0
+        self.step_interval = 60
+
+        """initialize the lists"""
+        self.node_list = [None for i in range(self.length)]
+        self.beam_list = []
+        self.init_pos = [None for i in range(self.length)]
+        # self.dynamic_pos = []
+        self.node_record = [None for i in range(self.length)]
+
+        for i in range(self.length):
+            self.beam_list.append([None for j in range(self.length)])
+
         # create the nodes and beams
+        self._init_pos()
         self._create_nodes(self.space)
         self._create_beams(self.stiffness_mat)
 
@@ -99,14 +108,47 @@ class HexaLattice:
 
         pygame.display.flip()
 
+    def _init_pos(self):
+        """calculate the initial position of the nodes""" 
+        sep_x = (self.settings.screen_width - (self.row_lenh - 1) * self.blen * math.sqrt(3))/2
+        sep_y = (self.settings.screen_height - ((self.row_num - 1)/2) * self.blen)/2
+
+        n = self.row_lenh
+        column_counter = 0
+        row_counter = 0
+
+        for i in range(self.length):
+            if column_counter == n or column_counter == self.T:
+                column_counter = column_counter % self.T
+                row_counter += 1
+
+            if column_counter < n:
+                pos_x = sep_x + column_counter * self.blen * math.sqrt(3)
+                pos_y = sep_y + row_counter * self.blen / 2
+            else:
+                pos_x = sep_x + (column_counter - n) * self.blen * math.sqrt(3) - self.blen * math.sqrt(3) / 2
+                pos_y = sep_y + row_counter * self.blen / 2
+
+            column_counter += 1
+            self.init_pos[i] = (pos_x, pos_y)
+
+    def _create_nodes(self, space):
+        """function that initializes the nodes"""
+        for i in range(self.length):
+            if (i + 1) % self.T == 0 or (i + 1) % self.T == self.row_lenh + 1:
+                self.node_record[i] = self.node.add_static_node(space, self.radius, self.init_pos[i])
+            else:
+                self.node_record[i] = self.node.add_float_node(space, self.radius, self.mass, self.init_pos[i])
+
+            self.node_list[i] = self.node_record[i][0]
+
     def _create_beams(self, stiffness_mat):
         """function that initializes the beams"""
-        length = self.length
         n = self.row_lenh
         # notion_mat = np.zeros((length, length))
 
-        for i in range(length):
-            for j in range(i + 1, length):
+        for i in range(self.length):
+            for j in range(i + 1, self.length):
                 if i % (2 * n + 1) != n and i % (2 * n + 1) != 2 * n:
                     if j == i + n or j == i + n + 1 or j == i + 2 * n + 1:
                         # notion_mat[i][j] = 1
@@ -126,57 +168,11 @@ class HexaLattice:
         # print(notion_mat)
         # return notion_mat
 
-    def _create_nodes(self, space):
-        """function that initializes the nodes"""
-        blen = self.settings.beam_length
-        radius = self.settings.node_radius
-        mass = self.settings.float_node_mass
-
-        sep_x = (self.settings.screen_width - (self.row_lenh - 1) * blen * math.sqrt(3))/2
-        sep_y = (self.settings.screen_height - ((self.row_num - 1)/2) * blen)/2
-
-        n = self.row_lenh
-        T = 2 * n + 1
-        column_counter = 0
-        row_counter = 0
-
-        for i in range(0, self.length):
-            if column_counter == n:
-                row_counter += 1
-
-            if column_counter == T:
-                column_counter = 0
-                row_counter += 1
-
-            if column_counter < n:
-                pos_x = sep_x + column_counter * blen * math.sqrt(3)
-                pos_y = sep_y + row_counter * blen / 2
-
-            if column_counter >= n and column_counter < T:
-                pos_x = sep_x + (column_counter - n) * blen * math.sqrt(3) - blen * math.sqrt(3) / 2
-                pos_y = sep_y + row_counter * blen / 2
-            column_counter += 1
-
-            if (i + 1) % T == 0 or (i + 1) % T == self.row_lenh + 1:
-                self.node_record[i] = self.node.add_static_node(space, radius, (pos_x, pos_y))
-                self.node_list[i] = self.node_record[i][0]
-
-            else:
-                self.node_record[i] = self.node.add_float_node(space, radius, mass, (pos_x, pos_y))
-                self.node_list[i] = self.node_record[i][0]
-
-            self.init_pos[i] = (pos_x, pos_y)
-
     def _create_float_nodes(self, space):
         """function that initializes the float nodes"""
-        n = self.row_lenh
-        T = 2 * n + 1
-        radius = self.settings.node_radius
-        mass = self.settings.float_node_mass
-
         for i in range(self.length):
-            if (i + 1) % T != 0 and (i + 1) % T != self.row_lenh + 1:
-                self.node_record[i] = self.node.add_float_node(space, radius, mass, self.init_pos[i])
+            if (i + 1) % self.T != 0 and (i + 1) % self.T != self.row_lenh + 1:
+                self.node_record[i] = self.node.add_float_node(space, self.radius, self.mass, self.init_pos[i])
                 self.node_list[i] = self.node_record[i][0]
                 # self.dynamic_pos[i] = self.init_pos[i]
 
@@ -212,8 +208,7 @@ class HexaLattice:
 
     def _update_pos(self):
         """record the dynamic position of the nodes"""
-        for i in range(self.length):
-            self.dynamic_pos[i] = self.node_list[i].position
+        self.daynamic_pos = [self.node_list[i].position for i in range(self.length)]
 
     def _reset_game(self, stiffness_mat):
         """reset the game"""
@@ -237,6 +232,10 @@ if __name__ == '__main__':
     N_GENERATIONS = set.N_GENERATIONS
     max_fitness = eva.max_fitness
     best_ind = eva.best_ind
+    
+    resume = set.resume
+    record = set.record
+
 
     """initialize the population and the population's position"""
     pop = np.random.rand(POP_SIZE, node_num, node_num) * 20
@@ -244,28 +243,27 @@ if __name__ == '__main__':
     pop_pos = []
     # store the fitness of each individual
     fitness = np.zeros(POP_SIZE)
+    pop_pos = np.zeros((POP_SIZE, node_num, 2))
 
-    for i in range(POP_SIZE):
-        pop_pos.append([])
-        for j in range(node_num):
-            pop_pos[i].append(None)
 
     """RESUME from the last generation"""
-    resume = set.resume
     if resume:
         stiffness_data = np.load(file="data.npy")
         pop = stiffness_data
 
     init_stiffness = np.random.rand(node_num, node_num) * 20
     popGame = HexaLattice(init_stiffness)
-
     print("\nEvolution starts")
+
 
     """initialize the plot"""
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    plt.xlabel('Generation')
+    plt.ylabel('Fitness')
+    plt.title('EVA')
+    # plt.ion()
 
-    plt.ion()
 
     """evolution process"""
     for gen in tqdm(range(N_GENERATIONS), colour='red', desc='EVA', dynamic_ncols=True):
@@ -305,15 +303,14 @@ if __name__ == '__main__':
 
         # create the new population
         fit_point = np.random.choice(POP_SIZE, p=sort_fitness / sum(sort_fitness))
-        pop = np.concatenate((pop[:fit_point], pop_fitness[fit_point:]))
+        pop = np.concatenate(
+            (pop[:fit_point], pop_fitness[fit_point:]), axis=None).reshape(POP_SIZE, node_num, node_num)
 
         sleep(0.01)
 
         """RECORD the last generation"""
-        record = set.record
         if record and gen % record_interval == 0:
-            temp_data = np.array(pop)
-            np.save(file="data.npy", arr=temp_data)
+            np.save(file="data.npy", arr=pop)
 
     # print the best individual
     np.savetxt('individual.csv', best_ind, delimiter=',')
@@ -321,8 +318,5 @@ if __name__ == '__main__':
     # print("Best individual: ", best_ind)
     print("Best Fitness: ", max_fitness)
 
-    plt.ioff()
-    plt.xlabel('Generation')
-    plt.ylabel('Fitness')
-    plt.title('EVA')
+    # plt.ioff()
     plt.show()

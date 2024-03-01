@@ -16,7 +16,7 @@ from pathlib import Path
 class HexaLattice:
     """Main class for HexaLattice simulation"""
 
-    def __init__(self, stiffness):
+    def __init__(self, stiffness_mat):
         # initialize pygame
         pygame.init()
         self.clock = pygame.time.Clock()
