@@ -284,8 +284,8 @@ if __name__ == '__main__':
         pop_fitness = np.array([pop[i] for i in sort_fitness])
 
         # record the best individual
-        index = sort_fitness[POP_SIZE - 1]
-        if fitness[index] > max_fitness:
+        if max(sort_fitness) > max_fitness:
+            index = sort_fitness[POP_SIZE - 1]
             max_fitness = fitness[index]
             best_ind = pop[index]
             print(f"\nthe current best fitness is {max_fitness}")
