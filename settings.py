@@ -9,7 +9,7 @@ class Settings:
         self.fps = 240
         self.bg_color = (230, 230, 230)
         self.gravity = (0, 0)
-        self.step = 1
+        self.step = 1 / 2
 
         # the number of the first row
         self.row_lenh = 2
@@ -18,9 +18,7 @@ class Settings:
         # the number of the rows
         self.row_num = 2 * self.col_lenh + 1
         # the length of the node list
-        self.length = int(
-            (2 * self.row_lenh + 1) * self.col_lenh + self.row_lenh
-        )
+        self.length = int((2 * self.row_lenh + 1) * self.col_lenh + self.row_lenh)
 
         # force settings
         self.force_1 = (0, 50)

@@ -1,4 +1,3 @@
-import sys
 import pymunk
 import pymunk.pygame_util
 import math

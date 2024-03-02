@@ -70,13 +70,14 @@ def get_fitness(indPos):
     """calculate the fitness of a certain individual"""
     target = target_function()
     length = set.row_lenh
+    num = node_num - 1
     sum_output = 0
 
     for i in range(length):
         bias_out = (target(indPos[num - i][0]) - indPos[num - i][1]) ** 2
         sum_output += bias_out
 
-    rms_out = math.sqrt(sum_output / length)
+    # rms_out = math.sqrt(sum_output / length)
     # fitness = rms_func(rms_out)
     # fitness = 1 / (math.exp(rms_out) + 1)
     fitness = max(0, 100 - sum_output)

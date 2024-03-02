@@ -1,7 +1,3 @@
-import math
-import pygame
-
-
 class Operations:
     """class that contains all the operations that can be performed on the simulation"""
 
