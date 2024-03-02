@@ -1,7 +1,4 @@
-import sys
-import pygame
 import pymunk
-import pymunk.pygame_util
 import math
 import EVA
 
@@ -20,19 +17,11 @@ class HexaLattice:
 
     def __init__(self, stiffness_mat):
         """program initialization"""
-        # initialize pygame
-        pygame.init()
-        self.clock = pygame.time.Clock()
         self.settings = Settings()
-        self.screen = pygame.display.set_mode(
-            (self.settings.screen_width, self.settings.screen_height)
-        )
-        pygame.display.set_caption("Mechanical Neural Network")
 
         # initialize pymunk
         self.space = pymunk.Space()
         self.space.gravity = self.settings.gravity
-        self.draw_option = pymunk.pygame_util.DrawOptions(self.screen)
 
         """initialize external classes"""
         self.beam = Beam(self)
@@ -55,7 +44,7 @@ class HexaLattice:
         # execution parameters
         self.stiffness_mat = stiffness_mat
         self.step_counter = 0
-        self.step_interval = 200
+        self.step_interval = 500
 
         """initialize the lists"""
         self.node_list = [None for i in range(self.length)]
@@ -79,7 +68,6 @@ class HexaLattice:
         self.ax.set_xlabel("Step")
         self.ax.set_ylabel("Fitness")
         self.ax.set_title("Fitness Curve")
-        # plt.ion()
 
         self.running = True
 
@@ -87,27 +75,16 @@ class HexaLattice:
         """Main game loop"""
         # while self.running:
         for _ in range(self.step_interval):
-            self._check_events()
             self._update_screen()
-            # self._check_stability()
             self.step_counter += 1
             self.space.step(self.step)
-            self.clock.tick(self.settings.fps)
 
             # record the dynamic position of the nodes and draw the fitness curve
             self._update_pos()
             self._plot_fitness()
 
-    def _check_events(self):
-        """Respond to user input"""
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-
     def _update_screen(self):
         """Update the screen"""
-        # self.screen.fill(self.settings.bg_color)
-        # self.space.debug_draw(self.draw_option)
 
         # apply force to the nodes
         body_1, body_2 = self.node_list[0], self.node_list[1]
@@ -116,7 +93,29 @@ class HexaLattice:
         self.operations.add_force(body_1, force_1_x, force_1_y)
         self.operations.add_force(body_2, force_2_x, force_2_y)
 
-        # pygame.display.flip()
+        # apply frictions
+        for i in range(0, self.settings.length):
+            v = math.sqrt(
+                self.node_list[i].velocity[0] ** 2 + self.node_list[i].velocity[1] ** 2
+            )
+            f = self.settings.friction
+            F = math.sqrt(
+                self.node_list[i].force[0] ** 2 + self.node_list[i].force[1] ** 2
+            )
+
+            if v >= 1e-2:
+                e = self.node_list[i].velocity / v
+                friction_x, friction_y = -f * e[0], -f * e[1]
+            elif v < 1e-2 and F < f:
+                friction_x, friction_y = (
+                    -self.node_list[i].force[0],
+                    -self.node_list[i].force[1],
+                )
+            else:
+                e = self.node_list[i].force / F
+                friction_x, friction_y = -f * e[0], -f * e[1]
+
+            self.operations.add_force(self.node_list[i], friction_x, friction_y)
 
     def _init_pos(self):
         """calculate the initial position of the nodes"""
@@ -191,68 +190,10 @@ class HexaLattice:
         # print(notion_mat)
         # return notion_mat
 
-    def _create_float_nodes(self, space):
-        """function that initializes the float nodes"""
-        for i in range(self.length):
-            if (i + 1) % self.T != 0 and (i + 1) % self.T != self.row_lenh + 1:
-                self.node_record[i] = self.node.add_float_node(
-                    space, self.radius, self.mass, self.init_pos[i]
-                )
-                self.node_list[i] = self.node_record[i][0]
-                # self.dynamic_pos[i] = self.init_pos[i]
-
-    def _delete_float_nodes(self):
-        """function that removes the float nodes"""
-        for i in range(self.length):
-            if (
-                self.node_list[i] is not None
-                and self.node_list[i].body_type == pymunk.Body.DYNAMIC
-            ):
-                self.space.remove(self.node_record[i][0])
-                self.space.remove(self.node_record[i][1])
-                self.node_list[i] = None
-
-    def _delete_beams(self):
-        """function that removes the beams"""
-        for i in range(self.length):
-            for j in range(i + 1, self.length):
-                if self.beam_list[i][j] is not None:
-                    self.space.remove(self.beam_list[i][j])
-                    self.beam_list[i][j] = None
-
-    def _check_stability(self):
-        """check if the network is stable"""
-        bias = 0
-        for i in range(self.length):
-            x_bias = (self.node_list[i].position[0] - self.dynamic_pos[i][0]) ** 2
-            y_bias = (self.node_list[i].position[1] - self.dynamic_pos[i][1]) ** 2
-            bias += x_bias + y_bias
-
-        rms = math.sqrt(bias / self.length)
-
-        if (
-            rms < self.settings.stability_bias
-            and self.step_counter > self.settings.stability_inf
-        ):
-            self.running = False
-        return True
-
     def _update_pos(self):
         """record the dynamic position of the nodes"""
         for i in range(self.length):
             self.dynamic_pos[i] = self.node_list[i].position
-
-        # self.daynamic_pos = [self.node_list[i].position for i in range(self.length)]
-
-    def _reset_game(self, stiffness_mat):
-        """reset the game"""
-        self._delete_float_nodes()
-        self._delete_beams()
-        self._create_float_nodes(self.space)
-        self._create_beams(stiffness_mat)
-
-        self.step_counter = 0
-        self.running = True
 
     def _plot_fitness(self):
         """calculate the fitness"""
@@ -267,7 +208,6 @@ if __name__ == "__main__":
     # read the stiffness matrix from the csv file
     path = Path(__file__).parent / "individual.csv"
     stiffness_mat = np.loadtxt(open(path, "rb"), delimiter=",", skiprows=0)
-    # print(stiffness_mat)
 
     # create the HexaLattice object
     hexalattice = HexaLattice(stiffness_mat)
@@ -275,5 +215,4 @@ if __name__ == "__main__":
     """run the simulation"""
     hexalattice.run_game()
     print(EVA.get_fitness(hexalattice.dynamic_pos))
-    # plt.ioff()
     plt.show()

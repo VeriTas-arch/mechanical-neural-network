@@ -34,8 +34,7 @@ def target_function():
     T = set.beam_length * 2 * math.sqrt(3) * 1.02
     omiga = 2 * math.pi / T
     Amp = set.beam_length / 25
-    # bias = set.beam_length * 0.65
-    bias = set.screen_height - sep_y + 7
+    bias = set.screen_height - sep_y + 12
     return lambda x: Amp * math.sin(omiga * (x - sep_x) + math.pi / 2) + bias
 
 
@@ -61,7 +60,7 @@ def avoid_function_sin():
 def rms_func(rms):
     """process the root mean square error"""
     # approximate the Dirac delta function
-    a = 1
+    a = 4
     gauss = math.exp(-(rms**2) / (a**2)) / (a * math.sqrt(math.pi))
     return gauss
 

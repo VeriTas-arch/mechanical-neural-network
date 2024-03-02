@@ -32,6 +32,7 @@ class Settings:
 
         # beam settings
         self.damping = 20
+        self.friction = 1
         self.beam_length = 100
 
         # node settings
@@ -42,7 +43,6 @@ class Settings:
         """evolution algorithm settings"""
         # population size, which is C(length, 2)
         self.pop_length = int(self.length * (self.length - 1) / 2)
-        self.scale_factor = 10
 
         self.POP_SIZE = 100
         self.DNA_SIZE = self.length
@@ -50,7 +50,7 @@ class Settings:
         self.MUTATION_RATE = 0.05
 
         # stability analysis settings
-        self.stability_bias = 1e-30
+        self.stability_bias = 1e-2
         self.stability_inf = 30
 
         # resume and record settings

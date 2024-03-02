@@ -45,8 +45,8 @@ class HexaLattice:
 
         # execution parameters
         self.stiffness_mat = stiffness_mat
-        self.step_counter = 0
-        self.step_interval = 50
+        # self.step_counter = 0
+        # self.step_interval = 50
 
         # stability parameters
         self.max_v_1 = 0
@@ -74,14 +74,11 @@ class HexaLattice:
 
     def run_game(self):
         """Main game loop"""
-        while self.running:
+        for _ in range(300):
             self._update_screen()
-            self._check_stability(1e-3)
+            # self._check_stability(self.settings.stablity_bias)
             # self.step_counter += 1
             self.space.step(self.step)
-
-            # record the dynamic position of the nodes
-            # self._update_pos()
 
     def _update_screen(self):
         """Update the screen with force function"""
@@ -91,6 +88,30 @@ class HexaLattice:
         (force_2_x, force_2_y) = self.settings.force_2
         self.operations.add_force(body_1, force_1_x, force_1_y)
         self.operations.add_force(body_2, force_2_x, force_2_y)
+
+        # apply frictions
+        for i in range(0, self.settings.length):
+            v = math.sqrt(
+                self.node_list[i].velocity[0] ** 2 + self.node_list[i].velocity[1] ** 2
+            )
+            f = self.settings.friction
+            F = math.sqrt(
+                self.node_list[i].force[0] ** 2 + self.node_list[i].force[1] ** 2
+            )
+
+            if v >= 1e-2:
+                e = self.node_list[i].velocity / v
+                friction_x, friction_y = -f * e[0], -f * e[1]
+            elif v < 1e-2 and F < f:
+                friction_x, friction_y = (
+                    -self.node_list[i].force[0],
+                    -self.node_list[i].force[1],
+                )
+            else:
+                e = self.node_list[i].force / F
+                friction_x, friction_y = -f * e[0], -f * e[1]
+
+            self.operations.add_force(self.node_list[i], friction_x, friction_y)
 
     def _init_pos(self):
         """calculate the initial position of the nodes"""
@@ -221,23 +242,14 @@ class HexaLattice:
             + self.node_list[set.length - 1].velocity[1] ** 2
         )
 
-        if self.max_v_1 < v_1:
-            self.max_v_1 = v_1
-            # print(self.max_v_1)
-
-        if self.max_v_2 < v_2:
-            self.max_v_2 = v_2
-            # print(self.max_v_1)
+        self.max_v_1 = max(v_1, self.max_v_1)
+        self.max_v_2 = max(v_2, self.max_v_2)
 
         if self.max_v_1 > 0.3 or self.max_v_2 > 0.3:
             if v_1 <= threshold and v_2 <= threshold:
                 self.running = False
                 self.max_v_1 = 0
                 self.max_v_2 = 0
-
-    def _update_pos(self):
-        """record the dynamic position of the nodes"""
-        self.daynamic_pos = [self.node_list[i].position for i in range(self.length)]
 
     def _reset_game(self, stiffness_mat):
         """reset the game"""
@@ -246,7 +258,6 @@ class HexaLattice:
         self._create_float_nodes(self.space)
         self._create_beams(stiffness_mat)
 
-        self.step_counter = 0
         self.running = True
 
 
@@ -283,7 +294,9 @@ if __name__ == "__main__":
     for gen in tqdm(range(N_GENERATIONS), colour="red", desc="EVA", dynamic_ncols=True):
 
         # calculate the fitness of the current generation
-        for i in range(POP_SIZE):
+        for i in tqdm(
+            range(POP_SIZE), colour="blue", desc="pymunk", dynamic_ncols=True
+        ):
             popGame._reset_game(pop[i])
             popGame.run_game()
 
@@ -299,8 +312,8 @@ if __name__ == "__main__":
         pop_fitness = np.array([pop[i] for i in sort_fitness])
 
         # record the best individual
-        if max(sort_fitness) > max_fitness:
-            index = sort_fitness[POP_SIZE - 1]
+        index = sort_fitness[POP_SIZE - 1]
+        if fitness[index] > max_fitness:
             max_fitness = fitness[index]
             best_ind = pop[index]
             # print(f"\nthe current best fitness is {max_fitness}")

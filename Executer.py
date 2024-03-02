@@ -24,7 +24,6 @@ class HexaLattice:
             (self.settings.screen_width, self.settings.screen_height)
         )
         pygame.display.set_caption("Mechanical Neural Network")
-        self.step_counter = 0
 
         # initialize pymunk
         self.space = pymunk.Space()
@@ -68,13 +67,7 @@ class HexaLattice:
             self._check_events()
             self._update_screen()
 
-            if self.step_counter == 200:
-                print(self.node_list[7].position)
-                print(self.node_list[10].position)
-                print(self.node_list[11].position)
-
-            self.step_counter += 1
-            self.space.step(1)
+            self.space.step(0.5)
             self.clock.tick(self.settings.fps)
 
     def _check_events(self):
@@ -95,6 +88,30 @@ class HexaLattice:
         (force_2_x, force_2_y) = self.settings.force_2
         self.operations.add_force(body_1, force_1_x, force_1_y)
         self.operations.add_force(body_2, force_2_x, force_2_y)
+
+        # apply frictions
+        for i in range(0, self.settings.length):
+            v = math.sqrt(
+                self.node_list[i].velocity[0] ** 2 + self.node_list[i].velocity[1] ** 2
+            )
+            f = self.settings.friction
+            F = math.sqrt(
+                self.node_list[i].force[0] ** 2 + self.node_list[i].force[1] ** 2
+            )
+
+            if v >= 1e-2:
+                e = self.node_list[i].velocity / v
+                friction_x, friction_y = -f * e[0], -f * e[1]
+            elif v < 1e-2 and F < f:
+                friction_x, friction_y = (
+                    -self.node_list[i].force[0],
+                    -self.node_list[i].force[1],
+                )
+            else:
+                e = self.node_list[i].force / F
+                friction_x, friction_y = -f * e[0], -f * e[1]
+
+            self.operations.add_force(self.node_list[i], friction_x, friction_y)
 
         pygame.display.flip()
 
