@@ -316,7 +316,7 @@ if __name__ == "__main__":
         if fitness[index] > max_fitness:
             max_fitness = fitness[index]
             best_ind = pop[index]
-            # print(f"\nthe current best fitness is {max_fitness}")
+            print(f"\nthe current best fitness is {max_fitness}")
 
         # chosse the parent based on fitness
         pop = EVA.select_parent(pop, fitness)
