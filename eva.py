@@ -58,26 +58,28 @@ def avoid_function_sin():
     return lambda x: Amp * math.sin(omiga * x + math.pi) + bias
 
 
+def rms_func(rms):
+    """process the root mean square error"""
+    # approximate the Dirac delta function
+    a = 1
+    gauss = math.exp(-(rms**2) / (a**2)) / (a * math.sqrt(math.pi))
+    return gauss
+
+
 def get_fitness(indPos):
     """calculate the fitness of a certain individual"""
     target = target_function()
-    # avoid = avoid_function_sin()
     length = set.row_lenh
-    num = node_num - 1
-    # sum_input = 0
     sum_output = 0
 
     for i in range(length):
-        # bias_in = (avoid(indPos[i][0]) - indPos[i][1]) ** 2
-        # print(f"node {num - i - 1} position: {indPos[num - i - 1]}")
-        # print(f"target {num - i - 1}: {target(indPos[num - i - 1][0])}")
-        # print(f"reference position: {indPos[7]}")
-
         bias_out = (target(indPos[num - i][0]) - indPos[num - i][1]) ** 2
         sum_output += bias_out
 
     rms_out = math.sqrt(sum_output / length)
-    fitness = 1 / (math.exp(rms_out) + 1)
+    # fitness = rms_func(rms_out)
+    # fitness = 1 / (math.exp(rms_out) + 1)
+    fitness = max(0, 100 - sum_output)
 
     return fitness
 

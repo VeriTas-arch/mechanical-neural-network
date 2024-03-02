@@ -1,19 +1,17 @@
 import sys
-import pygame
 import pymunk
 import pymunk.pygame_util
 import math
 import EVA
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 from settings import Settings
 from beam import Beam
 from node import Node
 from operations import Operations
-from time import sleep
 from tqdm import tqdm
+from time import sleep
 
 
 class HexaLattice:
@@ -21,19 +19,11 @@ class HexaLattice:
 
     def __init__(self, stiffness_mat):
         """program initialization"""
-        # initialize pygame
-        pygame.init()
-        self.clock = pygame.time.Clock()
         self.settings = Settings()
-        self.screen = pygame.display.set_mode(
-            (self.settings.screen_width, self.settings.screen_height)
-        )
-        pygame.display.set_caption("Mechanical Neural Network")
 
         # initialize pymunk
         self.space = pymunk.Space()
         self.space.gravity = self.settings.gravity
-        self.draw_option = pymunk.pygame_util.DrawOptions(self.screen)
 
         """initialize external classes"""
         self.beam = Beam(self)
@@ -45,31 +35,39 @@ class HexaLattice:
         self.length = self.settings.length
         self.step = self.settings.step
         self.row_lenh = self.settings.row_lenh
+        self.col_lenh = self.settings.col_lenh
         self.row_num = self.settings.row_num
 
         # node and beam parameters
         self.blen = self.settings.beam_length
-        self.T = 2 * self.row_lenh + 1
         self.radius = self.settings.node_radius
         self.mass = self.settings.float_node_mass
+        self.fnum = self.length - self.col_lenh * 2
 
         # execution parameters
         self.stiffness_mat = stiffness_mat
         self.step_counter = 0
         self.step_interval = 50
 
-        """initialize the lists"""
-        self.node_list = [None for i in range(self.length)]
-        self.beam_list = []
-        self.init_pos = [None for i in range(self.length)]
-        # self.dynamic_pos = []
-        self.node_record = [None for i in range(self.length)]
+        # stability parameters
+        self.max_v_1 = 0
+        self.max_v_2 = 0
 
-        for i in range(self.length):
-            self.beam_list.append([None for j in range(self.length)])
+        """initialize the lists"""
+        self.fnode_index = np.zeros(self.length)
+        self.beam_index = np.zeros((self.length, self.length))
+
+        # self.dynamic_pos = [None for i in range(self.length)]
+        self.init_pos = [None for i in range(self.length)]
+        self.node_record = [None for i in range(self.length)]
+        self.node_list = [None for i in range(self.length)]
+        self.beam_list = [
+            [None for j in range(self.length)] for i in range(self.length)
+        ]
 
         # create the nodes and beams
         self._init_pos()
+        self._init_index()
         self._create_nodes(self.space)
         self._create_beams(self.stiffness_mat)
 
@@ -77,37 +75,23 @@ class HexaLattice:
 
     def run_game(self):
         """Main game loop"""
-        # while self.running:
-        for _ in range(self.step_interval):
-            self._check_events()
+        while self.running:
             self._update_screen()
-            # self._check_stability()
+            self._check_stability(1e-3)
             # self.step_counter += 1
             self.space.step(self.step)
-            self.clock.tick(self.settings.fps)
 
             # record the dynamic position of the nodes
             # self._update_pos()
 
-    def _check_events(self):
-        """Respond to user input"""
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-
     def _update_screen(self):
-        """Update the screen"""
-        self.screen.fill(self.settings.bg_color)
-        self.space.debug_draw(self.draw_option)
-
+        """Update the screen with force function"""
         # apply force to the nodes
         body_1, body_2 = self.node_list[0], self.node_list[1]
         (force_1_x, force_1_y) = self.settings.force_1
         (force_2_x, force_2_y) = self.settings.force_2
         self.operations.add_force(body_1, force_1_x, force_1_y)
         self.operations.add_force(body_2, force_2_x, force_2_y)
-
-        pygame.display.flip()
 
     def _init_pos(self):
         """calculate the initial position of the nodes"""
@@ -117,12 +101,13 @@ class HexaLattice:
         sep_y = (self.settings.screen_height - ((self.row_num - 1) / 2) * self.blen) / 2
 
         n = self.row_lenh
+        T = 2 * self.row_lenh + 1
         column_counter = 0
         row_counter = 0
 
         for i in range(self.length):
-            if column_counter == n or column_counter == self.T:
-                column_counter = column_counter % self.T
+            if column_counter == n or column_counter == T:
+                column_counter = column_counter % T
                 row_counter += 1
 
             if column_counter < n:
@@ -139,66 +124,82 @@ class HexaLattice:
             column_counter += 1
             self.init_pos[i] = (pos_x, pos_y)
 
+    def _init_index(self):
+        """calculate the index of the nodes and beams"""
+        n = self.row_lenh
+        T = 2 * self.row_lenh + 1
+
+        # calculate the index of the float nodes
+        self.fnode_index = [
+            False if (i + 1) % T == 0 or (i + 1) % T == n + 1 else True
+            for i in range(self.length)
+        ]
+
+        # calculate the index of the beams
+        for i in range(self.length):
+            for j in range(i + 1, self.length):
+                if i % T != n and i % T != 2 * n:
+                    if j == i + n or j == i + n + 1 or j == i + 2 * n + 1:
+                        self.beam_index[i][j] = True
+
+                elif i % T == n and j == i + n + 1:
+                    self.beam_index[i][j] = True
+
+                elif i % T == 2 * n and j == i + n:
+                    self.beam_index[i][j] = True
+
     def _create_nodes(self, space):
         """function that initializes the nodes"""
-        for i in range(self.length):
-            if (i + 1) % self.T == 0 or (i + 1) % self.T == self.row_lenh + 1:
-                self.node_record[i] = self.node.add_static_node(
-                    space, self.radius, self.init_pos[i]
-                )
-            else:
-                self.node_record[i] = self.node.add_float_node(
+        self.node_record = [
+            (
+                self.node.add_float_node(
                     space, self.radius, self.mass, self.init_pos[i]
                 )
-
-            self.node_list[i] = self.node_record[i][0]
+                if self.fnode_index[i]
+                else self.node.add_static_node(space, self.radius, self.init_pos[i])
+            )
+            for i in range(self.length)
+        ]
+        self.node_list = [node[0] for node in self.node_record]
 
     def _create_beams(self, stiffness_mat):
         """function that initializes the beams"""
-        n = self.row_lenh
-        # notion_mat = np.zeros((length, length))
+        temp = [
+            (
+                self.beam.add_beam(
+                    self.node_list[i], self.node_list[j], stiffness_mat[i][j]
+                )
+                if self.beam_index[i][j]
+                else None
+            )
+            for i in range(self.length)
+            for j in range(self.length)
+        ]
 
-        for i in range(self.length):
-            for j in range(i + 1, self.length):
-                if i % (2 * n + 1) != n and i % (2 * n + 1) != 2 * n:
-                    if j == i + n or j == i + n + 1 or j == i + 2 * n + 1:
-                        # notion_mat[i][j] = 1
-                        self.beam_list[i][j] = self.beam.add_beam(
-                            self.node_list[i], self.node_list[j], stiffness_mat[i][j]
-                        )
-
-                elif i % (2 * n + 1) == n and j == i + n + 1:
-                    # notion_mat[i][j] = 1
-                    self.beam_list[i][j] = self.beam.add_beam(
-                        self.node_list[i], self.node_list[j], stiffness_mat[i][j]
-                    )
-
-                elif i % (2 * n + 1) == 2 * n and j == i + n:
-                    # notion_mat[i][j] = 1
-                    self.beam_list[i][j] = self.beam.add_beam(
-                        self.node_list[i], self.node_list[j], stiffness_mat[i][j]
-                    )
-
-        # print(notion_mat)
-        # return notion_mat
+        len_temp = len(temp)
+        self.beam_list = [
+            temp[i : i + self.length] for i in range(0, len_temp, self.length)
+        ]
 
     def _create_float_nodes(self, space):
         """function that initializes the float nodes"""
-        for i in range(self.length):
-            if (i + 1) % self.T != 0 and (i + 1) % self.T != self.row_lenh + 1:
-                self.node_record[i] = self.node.add_float_node(
+        temp = self.node_record.copy()
+        self.node_record = [
+            (
+                self.node.add_float_node(
                     space, self.radius, self.mass, self.init_pos[i]
                 )
-                self.node_list[i] = self.node_record[i][0]
-                # self.dynamic_pos[i] = self.init_pos[i]
+                if bool(self.fnode_index[i])
+                else temp[i]
+            )
+            for i in range(self.length)
+        ]
+        self.node_list = [node[0] for node in self.node_record]
 
     def _delete_float_nodes(self):
         """function that removes the float nodes"""
         for i in range(self.length):
-            if (
-                self.node_list[i] is not None
-                and self.node_list[i].body_type == pymunk.Body.DYNAMIC
-            ):
+            if bool(self.fnode_index[i]):
                 self.space.remove(self.node_record[i][0])
                 self.space.remove(self.node_record[i][1])
                 self.node_list[i] = None
@@ -211,22 +212,29 @@ class HexaLattice:
                     self.space.remove(self.beam_list[i][j])
                     self.beam_list[i][j] = None
 
-    def _check_stability(self):
-        """check if the network is stable"""
-        bias = 0
-        for i in range(self.length):
-            x_bias = (self.node_list[i].position[0] - self.dynamic_pos[i][0]) ** 2
-            y_bias = (self.node_list[i].position[1] - self.dynamic_pos[i][1]) ** 2
-            bias += x_bias + y_bias
+    def _check_stability(self, threshold):
+        v_1 = (
+            self.node_list[set.length - 2].velocity[0] ** 2
+            + self.node_list[set.length - 2].velocity[1] ** 2
+        )
+        v_2 = (
+            self.node_list[set.length - 1].velocity[0] ** 2
+            + self.node_list[set.length - 1].velocity[1] ** 2
+        )
 
-        rms = math.sqrt(bias / self.length)
+        if self.max_v_1 < v_1:
+            self.max_v_1 = v_1
+            # print(self.max_v_1)
 
-        if (
-            rms < self.settings.stability_bias
-            and self.step_counter > self.settings.stability_inf
-        ):
-            self.running = False
-        return True
+        if self.max_v_2 < v_2:
+            self.max_v_2 = v_2
+            # print(self.max_v_1)
+
+        if self.max_v_1 > 0.3 or self.max_v_2 > 0.3:
+            if v_1 <= threshold and v_2 <= threshold:
+                self.running = False
+                self.max_v_1 = 0
+                self.max_v_2 = 0
 
     def _update_pos(self):
         """record the dynamic position of the nodes"""
@@ -260,11 +268,8 @@ if __name__ == "__main__":
 
     """initialize the population and the population's position"""
     pop = np.random.rand(POP_SIZE, node_num, node_num) * 20
-    # store the positions of nodes in each individual
-    pop_pos = []
-    # store the fitness of each individual
-    fitness = np.zeros(POP_SIZE)
     pop_pos = np.zeros((POP_SIZE, node_num, 2))
+    fitness = np.zeros(POP_SIZE)
 
     """RESUME from the last generation"""
     if resume:
@@ -275,19 +280,11 @@ if __name__ == "__main__":
     popGame = HexaLattice(init_stiffness)
     print("\nEvolution starts")
 
-    """initialize the plot"""
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    plt.xlabel("Generation")
-    plt.ylabel("Fitness")
-    plt.title("EVA")
-
     """evolution process"""
     for gen in tqdm(range(N_GENERATIONS), colour="red", desc="EVA", dynamic_ncols=True):
 
         # calculate the fitness of the current generation
         for i in range(POP_SIZE):
-            # pop[i] = np.random.rand(node_num, node_num) * 40 * np.random.rand()
             popGame._reset_game(pop[i])
             popGame.run_game()
 
@@ -298,11 +295,6 @@ if __name__ == "__main__":
             [ind_fitness for ind_fitness in map(EVA.get_fitness, pop_pos)]
         )
 
-        # plot the fitness of the population
-        ax.scatter(np.ones(POP_SIZE) * gen, fitness, c="r", s=10)
-        plt.draw()
-        plt.pause(0.01)
-
         # sort the population based on fitness
         sort_fitness = np.argsort(fitness)
         pop_fitness = np.array([pop[i] for i in sort_fitness])
@@ -312,7 +304,7 @@ if __name__ == "__main__":
             index = sort_fitness[POP_SIZE - 1]
             max_fitness = fitness[index]
             best_ind = pop[index]
-            print(f"\nthe current best fitness is {max_fitness}")
+            # print(f"\nthe current best fitness is {max_fitness}")
 
         # chosse the parent based on fitness
         pop = EVA.select_parent(pop, fitness)
@@ -335,6 +327,4 @@ if __name__ == "__main__":
     np.savetxt("individual.csv", best_ind, delimiter=",")
 
     # print("Best individual: ", best_ind)
-    print("Best Fitness: ", max_fitness)
-
-    plt.show()
+    print(f"\nthe best fitness of this evolution is {max_fitness}")

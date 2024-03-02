@@ -55,7 +55,7 @@ class HexaLattice:
         # execution parameters
         self.stiffness_mat = stiffness_mat
         self.step_counter = 0
-        self.step_interval = 500
+        self.step_interval = 200
 
         """initialize the lists"""
         self.node_list = [None for i in range(self.length)]
@@ -274,6 +274,6 @@ if __name__ == "__main__":
 
     """run the simulation"""
     hexalattice.run_game()
-
+    print(EVA.get_fitness(hexalattice.dynamic_pos))
     # plt.ioff()
     plt.show()
