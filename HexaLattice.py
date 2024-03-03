@@ -329,7 +329,7 @@ if __name__ == "__main__":
             (pop[:fit_point], pop_fitness[fit_point:]), axis=None
         ).reshape(POP_SIZE, node_num, node_num)
 
-        sleep(0.01)
+        # sleep(0.01)
 
         """RECORD the last generation"""
         if record and gen % record_interval == 0:
