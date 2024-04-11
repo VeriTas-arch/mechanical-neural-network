@@ -1,0 +1,11 @@
+/id_rsa.pub
+/id_rsa.pub.pub
+/learn.py
+/data.npy
+test.py
+test.ipynb
+/storage
+*.csv
+/__pycache__
+/.vscode
+test.py
