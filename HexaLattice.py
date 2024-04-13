@@ -2,7 +2,6 @@ import pymunk
 import pymunk.pygame_util
 import math
 import EVA
-import time
 
 import numpy as np
 
@@ -10,7 +9,6 @@ from settings import Settings
 from beam import Beam
 from node import Node
 from operations import Operations
-from tqdm import tqdm
 from multiprocessing import Process, Queue
 
 
@@ -260,10 +258,12 @@ class HexaLattice:
 
         self.running = True
 
+
 set = Settings()
 eva = EVA.Eva()
 
-def pymunk_run(queue,process_num, popGame):
+
+def pymunk_run(queue, process_num, popGame):
     """function that runs the pymunk simulation"""
 
     # initialize the parameters
@@ -272,7 +272,7 @@ def pymunk_run(queue,process_num, popGame):
     node_num = set.length
     N_GENERATIONS = set.N_GENERATIONS
     POP_SIZE = set.POP_SIZE
-    
+
     # randomly initialize the possibilities
     crossover_rate = np.random.choice(set.CROSSOVER_RATE, size=1)
     mutation_rate = np.random.choice(set.MUTATION_RATE, size=1)
@@ -281,7 +281,7 @@ def pymunk_run(queue,process_num, popGame):
     pop = np.random.rand(POP_SIZE, node_num, node_num) * 25
     pop_pos = np.zeros((POP_SIZE, node_num, 2))
     fitness = np.zeros(POP_SIZE)
-    
+
     detect_interval = int(N_GENERATIONS / 5)
 
     for gen in range(N_GENERATIONS):
@@ -290,45 +290,56 @@ def pymunk_run(queue,process_num, popGame):
             popGame._reset_game(pop[i])
             popGame.run_game()
 
-            pop_pos[i]=[popGame.node_list[j].position for j in range(node_num)]
+            pop_pos[i] = [popGame.node_list[j].position for j in range(node_num)]
             # print(pop_pos[index])
-            
+
         # get the fitness of the population
         fitness = np.array(
             [ind_fitness for ind_fitness in map(EVA.get_fitness, pop_pos)]
         )
-        
+
         # sort the population based on fitness
         sort_fitness = np.argsort(fitness)
         pop_fitness = np.array([pop[i] for i in sort_fitness])
-        
+
         # record the best individual
         index = sort_fitness[POP_SIZE - 1]
         if fitness[index] > max_fitness:
             max_fitness = fitness[index]
             best_ind = pop[index]
-            # print(f"\nthe current best fitness is {max_fitness}")
+
+            if process_num == 0:
+                print(f"\nthe current best fitness is {max_fitness}")
 
         # chosse the parent based on fitness
         pop = EVA.select_parent(pop, fitness)
         popCopy = pop.copy()
-        pop = [EVA.process(popCopy, pop[popIndex], crossover_rate, mutation_rate) for popIndex in range(POP_SIZE)]
+        pop = [
+            EVA.process(popCopy, pop[popIndex], crossover_rate, mutation_rate)
+            for popIndex in range(POP_SIZE)
+        ]
 
         # create the new population
         fit_point = np.random.choice(POP_SIZE, p=sort_fitness / sum(sort_fitness))
         pop = np.concatenate(
             (pop[:fit_point], pop_fitness[fit_point:]), axis=None
-            ).reshape(POP_SIZE, node_num, node_num)
-        
+        ).reshape(POP_SIZE, node_num, node_num)
+
         if gen % detect_interval == 0 and process_num == 0:
             progress = gen / N_GENERATIONS * 100
             print(f"\nEVA{process_num} is processing {progress:.2f}%")
 
     # save the result
     result = (max_fitness, best_ind)
-    np.savetxt(f"./storage/multiprocessing/individual{process_num}.csv", result[1], delimiter=",")
+    np.savetxt(
+        f"./storage/multiprocessing/individual{process_num}.csv",
+        result[1],
+        delimiter=",",
+    )
     print(f"\nthe best fitness of EVA{process_num} is {result[0]}")
-    print(f"crossover rate{process_num}: {crossover_rate}, mutation rate{process_num}: {mutation_rate}")
+    print(
+        f"crossover rate{process_num}: {crossover_rate}, mutation rate{process_num}: {mutation_rate}"
+    )
     # queue.put(result)
 
 
@@ -348,12 +359,12 @@ if __name__ == "__main__":
     process_list = []
 
     for i in range(process_num):
-        p = Process(target=pymunk_run, args=(queue,i,popGame))
+        p = Process(target=pymunk_run, args=(queue, i, popGame))
         p.start()
         process_list.append(p)
-            
+
     for p in process_list:
         p.join()
 
     # for i in range(process_num):
-        # result = queue.get()
+    # result = queue.get()

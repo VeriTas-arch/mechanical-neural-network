@@ -50,7 +50,9 @@ def target_function():
     Amp = set.beam_length / 15
     # bias = set.screen_height - sep_y - blen / 2 + blen / 3
     bias = set.screen_height - sep_y + 5
-    return lambda x: Amp * math.sin(omiga * (x - sep_x + blen * math.sqrt(3) / 2)) + bias
+    return (
+        lambda x: Amp * math.sin(omiga * (x - sep_x + blen * math.sqrt(3) / 2)) + bias
+    )
 
 
 def avoid_function_lin():
@@ -111,18 +113,20 @@ def select_parent(pop, fitness):
 
 def crossover(pop, parent, crossover_rate):
     """crossover the parents to generate offspring"""
-    # choose an individual from the population to crossover
     if np.random.rand() < crossover_rate:
         index = np.random.randint(0, POP_SIZE - 1)
-        # choose a crossover point
         point = np.random.randint(1, DNA_SIZE - 1)
+        """
         crossover_result = [
-            np.concatenate((parent[i][:point], pop[index][i][point:]))
-            for i in range(node_num)
+            pop[index][i] if i == point else parent[i] for i in range(node_num)
         ]
-
+        """
+        crossover_result = [
+        np.concatenate((parent[i][:point], pop[index][i][point:]))
+        for i in range(node_num)
+    ]
         return crossover_result
-    
+
     else:
         return parent
 
