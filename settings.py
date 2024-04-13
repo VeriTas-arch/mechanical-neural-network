@@ -1,3 +1,5 @@
+import numpy as np
+
 class Settings:
     """class to store the settings of the stimulation environment"""
 
@@ -42,14 +44,21 @@ class Settings:
         self.float_node_mass = 10
 
         """evolution algorithm settings"""
-        # population size, which is C(length, 2)
+        # connection matrix size, which is C(length, 2)
         self.pop_length = int(self.length * (self.length - 1) / 2)
 
+        # population size for each process
         self.POP_SIZE = 10
+
+        # process number, i.e. the core number of the CPU
+        self.N_CORES = 4
+
         self.DNA_SIZE = self.length
-        self.N_GENERATIONS = 100
-        self.MUTATION_RATE = 0.02
-        self.CROSSOVER_RATE = 0.6
+        self.N_GENERATIONS = 20
+
+        # mutation and crossover rate range
+        self.CROSSOVER_RATE = np.arange(0.2, 0.6, 0.01)
+        self.MUTATION_RATE = np.arange(0.01, 0.1, 0.001)
 
         # stability analysis settings
         self.stability_bias = 1e-2

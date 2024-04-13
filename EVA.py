@@ -109,28 +109,32 @@ def select_parent(pop, fitness):
     return temp
 
 
-def crossover(pop, parent):
+def crossover(pop, parent, crossover_rate):
     """crossover the parents to generate offspring"""
     # choose an individual from the population to crossover
-    index = np.random.randint(0, POP_SIZE - 1)
-    # choose a crossover point
-    point = np.random.randint(1, DNA_SIZE - 1)
-    crossover_result = [
-        np.concatenate((parent[i][:point], pop[index][i][point:]))
-        for i in range(node_num)
-    ]
+    if np.random.rand() < crossover_rate:
+        index = np.random.randint(0, POP_SIZE - 1)
+        # choose a crossover point
+        point = np.random.randint(1, DNA_SIZE - 1)
+        crossover_result = [
+            np.concatenate((parent[i][:point], pop[index][i][point:]))
+            for i in range(node_num)
+        ]
 
-    return crossover_result
+        return crossover_result
+    
+    else:
+        return parent
 
 
-def mutate(child):
+def mutate(child, mutation_rate):
     """mutation operator"""
     child = np.array(child)
     interval = np.max(child) - np.min(child)
 
     # mutation process
     for i in range(DNA_SIZE):
-        if np.random.rand() < MUTATION_RATE:
+        if np.random.rand() < mutation_rate:
             point = i
             child = (
                 point
@@ -141,9 +145,9 @@ def mutate(child):
     return child
 
 
-def process(pop, parent):
+def process(pop, parent, crossover_rate, mutation_rate):
     """process the population with crossover and mutation"""
-    offspring = crossover(pop, parent)
-    offspring = mutate(offspring)
+    offspring = crossover(pop, parent, crossover_rate)
+    offspring = mutate(offspring, mutation_rate)
 
     return offspring
