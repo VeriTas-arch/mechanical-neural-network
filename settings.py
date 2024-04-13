@@ -49,6 +49,7 @@ class Settings:
         self.DNA_SIZE = self.length
         self.N_GENERATIONS = 100
         self.MUTATION_RATE = 0.02
+        self.CROSSOVER_RATE = 0.6
 
         # stability analysis settings
         self.stability_bias = 1e-2
