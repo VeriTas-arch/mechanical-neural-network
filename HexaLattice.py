@@ -2,6 +2,7 @@ import pymunk
 import pymunk.pygame_util
 import math
 import EVA
+import time
 
 import numpy as np
 
@@ -274,15 +275,15 @@ def pymunk_run(queue, process_num, popGame):
     POP_SIZE = set.POP_SIZE
 
     # randomly initialize the possibilities
-    crossover_rate = np.random.choice(set.CROSSOVER_RATE, size=1)
-    mutation_rate = np.random.choice(set.MUTATION_RATE, size=1)
+    crossover_rate = np.random.choice(set.CROSSOVER_RATE)
+    mutation_rate = np.random.choice(set.MUTATION_RATE)
 
     # initialize the population and the population's position
     pop = np.random.rand(POP_SIZE, node_num, node_num) * 25
     pop_pos = np.zeros((POP_SIZE, node_num, 2))
     fitness = np.zeros(POP_SIZE)
 
-    detect_interval = int(N_GENERATIONS / 5)
+    detect_interval = int(N_GENERATIONS / 100)
 
     for gen in range(N_GENERATIONS):
 
@@ -315,7 +316,7 @@ def pymunk_run(queue, process_num, popGame):
         pop = EVA.select_parent(pop, fitness)
         popCopy = pop.copy()
         pop = [
-            EVA.process(popCopy, pop[popIndex], crossover_rate, mutation_rate)
+            EVA.process(popCopy, pop[popIndex], crossover_rate, mutation_rate, fitness)
             for popIndex in range(POP_SIZE)
         ]
 
@@ -325,7 +326,7 @@ def pymunk_run(queue, process_num, popGame):
             (pop[:fit_point], pop_fitness[fit_point:]), axis=None
         ).reshape(POP_SIZE, node_num, node_num)
 
-        if gen % detect_interval == 0 and process_num == 0:
+        if process_num == 0:
             progress = gen / N_GENERATIONS * 100
             print(f"\nEVA{process_num} is processing {progress:.2f}%")
 
@@ -354,6 +355,8 @@ if __name__ == "__main__":
     print("\nEvolution starts")
 
     queue = Queue()
+    
+    st = time.time()
 
     """evolution process"""
     process_list = []
@@ -365,6 +368,9 @@ if __name__ == "__main__":
 
     for p in process_list:
         p.join()
+
+    ed = time.time()
+    print(f"\nEvolution ends, total time: {ed - st:.2f}s")
 
     # for i in range(process_num):
     # result = queue.get()
