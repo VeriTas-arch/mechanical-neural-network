@@ -114,21 +114,20 @@ def select_parent(pop, fitness):
 def crossover(pop, parent, crossover_rate, fitness, type=0):
     """crossover the parents to generate offspring"""
     if np.random.rand() < crossover_rate:
-        index = np.random.choice(
-        POP_SIZE, p=fitness / sum(fitness)
-    )
+        index = np.random.choice(POP_SIZE, p=fitness / sum(fitness))
         point = np.random.randint(1, DNA_SIZE - 1)
 
         if type == 0:
             crossover_result = [
-                pop[index][i] if abs(i-point) < 2 else parent[i] for i in range(node_num)
+                pop[index][i] if abs(i - point) < 2 else parent[i]
+                for i in range(node_num)
             ]
 
         if type == 1:
             crossover_result = [
-            np.concatenate((parent[i][:point], pop[index][i][point:]))
-            for i in range(node_num)
-        ]
+                np.concatenate((parent[i][:point], pop[index][i][point:]))
+                for i in range(node_num)
+            ]
 
         return crossover_result
 

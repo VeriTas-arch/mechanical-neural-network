@@ -261,7 +261,6 @@ class HexaLattice:
 
 
 set = Settings()
-eva = EVA.Eva()
 
 
 def pymunk_run(queue, process_num, popGame):
@@ -282,8 +281,9 @@ def pymunk_run(queue, process_num, popGame):
     pop = np.random.rand(POP_SIZE, node_num, node_num) * 25
     pop_pos = np.zeros((POP_SIZE, node_num, 2))
     fitness = np.zeros(POP_SIZE)
+    fit_data = np.zeros((N_GENERATIONS, 2))
 
-    detect_interval = int(N_GENERATIONS / 100)
+    # detect_interval = int(N_GENERATIONS / 100)
 
     for gen in range(N_GENERATIONS):
 
@@ -298,6 +298,8 @@ def pymunk_run(queue, process_num, popGame):
         fitness = np.array(
             [ind_fitness for ind_fitness in map(EVA.get_fitness, pop_pos)]
         )
+
+        fit_data[gen] = [max(fitness), np.mean(fitness)]
 
         # sort the population based on fitness
         sort_fitness = np.argsort(fitness)
@@ -337,6 +339,9 @@ def pymunk_run(queue, process_num, popGame):
         result[1],
         delimiter=",",
     )
+    np.savetxt(
+        f"./storage/multiprocessing/fitness{process_num}.csv", fit_data, delimiter=","
+    )
     print(f"\nthe best fitness of EVA{process_num} is {result[0]}")
     print(
         f"crossover rate{process_num}: {crossover_rate}, mutation rate{process_num}: {mutation_rate}"
@@ -355,7 +360,7 @@ if __name__ == "__main__":
     print("\nEvolution starts")
 
     queue = Queue()
-    
+
     st = time.time()
 
     """evolution process"""
