@@ -4,27 +4,27 @@ import pymunk
 import pymunk.pygame_util
 import math
 import numpy as np
+import EVA
 
 from settings import Settings
 from beam import Beam
 from node import Node
 from operations import Operations
-from time import sleep
 from pathlib import Path
 
 
 class HexaLattice:
     """Main class for HexaLattice simulation"""
 
-    def __init__(self, stiffness):
+    def __init__(self, stiffness_mat):
         # initialize pygame
         pygame.init()
         self.clock = pygame.time.Clock()
         self.settings = Settings()
         self.screen = pygame.display.set_mode(
-            (self.settings.screen_width, self.settings.screen_height))
+            (self.settings.screen_width, self.settings.screen_height)
+        )
         pygame.display.set_caption("Mechanical Neural Network")
-        self.step_counter = 0
 
         # initialize pymunk
         self.space = pymunk.Space()
@@ -68,13 +68,7 @@ class HexaLattice:
             self._check_events()
             self._update_screen()
 
-            if self.step_counter == 200:
-                print(self.node_list[7].position)
-                print(self.node_list[10].position)
-                print(self.node_list[11].position)
-
-            self.step_counter += 1
-            self.space.step(1)
+            self.space.step(0.5)
             self.clock.tick(self.settings.fps)
 
     def _check_events(self):
@@ -89,13 +83,37 @@ class HexaLattice:
         self.space.debug_draw(self.draw_option)
 
         # apply force to the nodes
-        body_1 = self.node_list[0]
-        body_2 = self.node_list[1]
-        (force_1_x, force_1_y) = self.settings.force_1
-        (force_2_x, force_2_y) = self.settings.force_2
-        self.operations.add_force(body_1, force_1_x, force_1_y)
-        self.operations.add_force(body_2, force_2_x, force_2_y)
+        body = [self.node_list[i] for i in range(self.row_lenh)]
+        (force_x, force_y) = self.settings.force_h
 
+        for i in range(self.row_lenh):
+            self.operations.add_force(body[i], force_x, force_y)
+
+        # apply frictions
+        for i in range(0, self.settings.length):
+            v = math.sqrt(
+                self.node_list[i].velocity[0] ** 2 + self.node_list[i].velocity[1] ** 2
+            )
+            f = self.settings.friction
+            F = math.sqrt(
+                self.node_list[i].force[0] ** 2 + self.node_list[i].force[1] ** 2
+            )
+
+            if v >= 1e-2:
+                e = self.node_list[i].velocity / v
+                friction_x, friction_y = -f * e[0], -f * e[1]
+            elif v < 1e-2 and F < f:
+                friction_x, friction_y = (
+                    -self.node_list[i].force[0],
+                    -self.node_list[i].force[1],
+                )
+            else:
+                e = self.node_list[i].force / F
+                friction_x, friction_y = -f * e[0], -f * e[1]
+
+            self.operations.add_force(self.node_list[i], friction_x, friction_y)
+
+        self._draw_target()
         pygame.display.flip()
 
     def _create_beams(self, stiffness_mat):
@@ -110,17 +128,20 @@ class HexaLattice:
                     if j == i + n or j == i + n + 1 or j == i + 2 * n + 1:
                         notion_mat[i][j] = 1
                         self.beam_list[i][j] = self.beam.add_beam(
-                            self.node_list[i], self.node_list[j], stiffness_mat[i][j])
+                            self.node_list[i], self.node_list[j], stiffness_mat[i][j]
+                        )
 
                 elif i % (2 * n + 1) == n and j == i + n + 1:
                     notion_mat[i][j] = 1
                     self.beam_list[i][j] = self.beam.add_beam(
-                        self.node_list[i], self.node_list[j], stiffness_mat[i][j])
+                        self.node_list[i], self.node_list[j], stiffness_mat[i][j]
+                    )
 
-                elif i % (2 * n + 1) == 2*n and j == i + n:
+                elif i % (2 * n + 1) == 2 * n and j == i + n:
                     notion_mat[i][j] = 1
                     self.beam_list[i][j] = self.beam.add_beam(
-                        self.node_list[i], self.node_list[j], stiffness_mat[i][j])
+                        self.node_list[i], self.node_list[j], stiffness_mat[i][j]
+                    )
 
         # print(notion_mat)
         return notion_mat
@@ -131,8 +152,10 @@ class HexaLattice:
         radius = self.settings.node_radius
         mass = self.settings.float_node_mass
 
-        sep_x = (self.settings.screen_width - (self.row_lenh - 1) * blen * math.sqrt(3))/2
-        sep_y = (self.settings.screen_height - ((self.row_num - 1)/2) * blen)/2
+        sep_x = (
+            self.settings.screen_width - (self.row_lenh - 1) * blen * math.sqrt(3)
+        ) / 2
+        sep_y = (self.settings.screen_height - ((self.row_num - 1) / 2) * blen) / 2
 
         n = self.row_lenh
         T = 2 * n + 1
@@ -152,23 +175,46 @@ class HexaLattice:
                 pos_y = sep_y + row_counter * blen / 2
 
             if column_counter >= n and column_counter < T:
-                pos_x = sep_x + (column_counter - n) * blen * math.sqrt(3) - blen * math.sqrt(3) / 2
+                pos_x = (
+                    sep_x
+                    + (column_counter - n) * blen * math.sqrt(3)
+                    - blen * math.sqrt(3) / 2
+                )
                 pos_y = sep_y + row_counter * blen / 2
             column_counter += 1
 
             if (i + 1) % T == 0 or (i + 1) % T == self.row_lenh + 1:
-                self.node_record[i] = self.node.add_static_node(space, radius, (pos_x, pos_y))
+                self.node_record[i] = self.node.add_static_node(
+                    space, radius, (pos_x, pos_y)
+                )
                 self.node_list[i] = self.node_record[i][0]
-                
             else:
-                self.node_record[i] = self.node.add_float_node(space, radius, mass, (pos_x, pos_y))
+                self.node_record[i] = self.node.add_float_node(
+                    space, radius, mass, (pos_x, pos_y)
+                )
                 self.node_list[i] = self.node_record[i][0]
 
             self.init_pos[i] = (pos_x, pos_y)
 
-if __name__ == '__main__':
+    def _draw_target(self):
+        blen = self.settings.beam_length
+        sep_x = (
+            self.settings.screen_width - (self.row_lenh - 1) * blen * math.sqrt(3)
+        ) / 2
+
+        target = EVA.target_function()
+
+        min = sep_x - blen * math.sqrt(3) / 2
+        max = self.settings.screen_width - min
+
+        for x in np.arange(min, max, 1):
+            y = target(x)
+            pygame.draw.rect(self.screen, (255, 0, 0), (x, y, 1, 1), 3)
+
+
+if __name__ == "__main__":
     # read the stiffness matrix from the csv file
-    path = Path(__file__).parent / "individual.csv"
+    path = Path(__file__).parent / "storage" / "multiprocessing" / "individual1.csv"
     stiffness_mat = np.loadtxt(open(path, "rb"), delimiter=",", skiprows=0)
     # print(stiffness_mat)
 
