@@ -143,10 +143,8 @@ def mutate(child, mutation_rate):
         point = np.random.randint(0, DNA_SIZE)
 
         # mutation process
-        child = (
-            point
-            + interval / (1 + child)
-            + point * np.random.rand(node_num, node_num)
+        child = interval / (1 + child) + (point + 1) * np.random.rand(
+            node_num, node_num
         )
 
     return child

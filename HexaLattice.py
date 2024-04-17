@@ -341,7 +341,9 @@ def pymunk_run(queue, process_num, popGame):
         delimiter=",",
     )
     np.savetxt(
-        f"./storage/multiprocessing/fitness_data/fitness{process_num}.csv", fit_data, delimiter=","
+        f"./storage/multiprocessing/fitness_data/fitness{process_num}.csv",
+        fit_data,
+        delimiter=",",
     )
     print(f"\nthe best fitness of EVA{process_num} is {result[0]}")
     print(

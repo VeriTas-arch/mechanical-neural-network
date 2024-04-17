@@ -195,27 +195,26 @@ class HexaLattice:
                 self.node_list[i] = self.node_record[i][0]
 
             self.init_pos[i] = (pos_x, pos_y)
-            
+
     def _draw_target(self):
         blen = self.settings.beam_length
         sep_x = (
             self.settings.screen_width - (self.row_lenh - 1) * blen * math.sqrt(3)
         ) / 2
-        
+
         target = EVA.target_function()
 
         min = sep_x - blen * math.sqrt(3) / 2
         max = self.settings.screen_width - min
-        
+
         for x in np.arange(min, max, 1):
             y = target(x)
             pygame.draw.rect(self.screen, (255, 0, 0), (x, y, 1, 1), 3)
 
 
-
 if __name__ == "__main__":
     # read the stiffness matrix from the csv file
-    path = Path(__file__).parent /'storage'/'multiprocessing'/ "individual1.csv"
+    path = Path(__file__).parent / "storage" / "multiprocessing" / "individual1.csv"
     stiffness_mat = np.loadtxt(open(path, "rb"), delimiter=",", skiprows=0)
     # print(stiffness_mat)
 
