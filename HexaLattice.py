@@ -3,6 +3,7 @@ import pymunk.pygame_util
 import math
 import EVA
 import time
+import os
 
 import numpy as np
 
@@ -340,7 +341,7 @@ def pymunk_run(queue, process_num, popGame):
         delimiter=",",
     )
     np.savetxt(
-        f"./storage/multiprocessing/fitness{process_num}.csv", fit_data, delimiter=","
+        f"./storage/multiprocessing/fitness_data/fitness{process_num}.csv", fit_data, delimiter=","
     )
     print(f"\nthe best fitness of EVA{process_num} is {result[0]}")
     print(
@@ -379,3 +380,5 @@ if __name__ == "__main__":
 
     # for i in range(process_num):
     # result = queue.get()
+
+    os.system("python plot.py")

@@ -137,18 +137,17 @@ def crossover(pop, parent, crossover_rate, fitness, type=0):
 
 def mutate(child, mutation_rate):
     """mutation operator"""
-    child = np.array(child)
-    interval = np.max(child) - np.min(child)
+    if np.random.rand() < mutation_rate:
+        child = np.array(child)
+        interval = np.max(child) - np.min(child)
+        point = np.random.randint(0, DNA_SIZE)
 
-    # mutation process
-    for i in range(DNA_SIZE):
-        if np.random.rand() < mutation_rate:
-            point = i
-            child = (
-                point
-                + interval / (1 + child)
-                + point * np.random.rand(node_num, node_num)
-            )
+        # mutation process
+        child = (
+            point
+            + interval / (1 + child)
+            + point * np.random.rand(node_num, node_num)
+        )
 
     return child
 
