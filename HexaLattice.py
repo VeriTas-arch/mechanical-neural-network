@@ -3,7 +3,7 @@ import pymunk.pygame_util
 import math
 import EVA
 import time
-import os
+import plot
 
 import numpy as np
 
@@ -351,6 +351,8 @@ def pymunk_run(queue, process_num, popGame):
     )
     # queue.put(result)
 
+    plot.plot_fitness(crossover_rate, mutation_rate)
+
 
 if __name__ == "__main__":
     """initialize the population and the population's position"""
@@ -382,5 +384,3 @@ if __name__ == "__main__":
 
     # for i in range(process_num):
     # result = queue.get()
-
-    os.system("python plot.py")
