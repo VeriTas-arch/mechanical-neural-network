@@ -68,7 +68,7 @@ class HexaLattice:
             self._check_events()
             self._update_screen()
 
-            self.space.step(0.5)
+            self.space.step(self.settings.step)
             self.clock.tick(self.settings.fps)
 
     def _check_events(self):

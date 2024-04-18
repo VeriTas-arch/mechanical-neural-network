@@ -12,10 +12,10 @@ class Settings:
         self.fps = 60
         self.bg_color = (230, 230, 230)
         self.gravity = (0, 0)
-        self.step = 1 / 2
+        self.step = 1
 
         # the number of the first row
-        self.row_lenh = 2
+        self.row_lenh = 4
         # the number of the first column
         self.col_lenh = 2
         # the number of the rows
@@ -24,9 +24,9 @@ class Settings:
         self.length = int((2 * self.row_lenh + 1) * self.col_lenh + self.row_lenh)
 
         # force settings
-        self.force_1 = (0, 50)
-        self.force_2 = (0, 50)
-        self.force_h = (0, 50)
+        self.force_1 = (0, 10)
+        self.force_2 = (0, 10)
+        self.force_h = (0, 10)
 
         # opearation settings
         self.arrow_color = (255, 0, 0)
@@ -49,7 +49,7 @@ class Settings:
         self.pop_length = int(self.length * (self.length - 1) / 2)
 
         # population size for each process
-        self.POP_SIZE = 70
+        self.POP_SIZE = 600
 
         # process number, i.e. the core number of the CPU
         self.N_CORES = 4
