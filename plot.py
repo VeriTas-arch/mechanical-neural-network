@@ -53,8 +53,10 @@ def plot_fitness(crossover_rate=0.6, mutation_rate=0.1):
         plt.ylabel("Fitness")
         plt.title(f"crossover: {crossover_rate:.2f}, mutation: {mutation_rate:.2f}")
 
+        len_fit_data = len(fit_data)
+
         ax2.scatter(
-            np.arange(N_GENERATIONS),
+            np.arange(len_fit_data),
             fit_data[:, 0],
             c="r",
             alpha=1,
