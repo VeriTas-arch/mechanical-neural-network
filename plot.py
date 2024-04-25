@@ -64,7 +64,7 @@ def plot_fitness(crossover_rate=0.6, mutation_rate=0.1):
             label="max fitness",
         )
         ax2.scatter(
-            np.arange(N_GENERATIONS),
+            np.arange(len_fit_data),
             fit_data[:, 1],
             c="b",
             alpha=1,
