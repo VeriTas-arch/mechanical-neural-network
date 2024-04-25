@@ -82,4 +82,3 @@ def plot_fitness(crossover_rate=0.6, mutation_rate=0.1):
             / f"fitness{i}_2.png"
         )
         fig2.savefig(path2)
-
