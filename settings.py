@@ -15,7 +15,7 @@ class Settings:
         self.step = 1
 
         # the number of the first row
-        self.row_lenh = 4
+        self.row_lenh = 2
         # the number of the first column
         self.col_lenh = 2
         # the number of the rows
@@ -49,13 +49,13 @@ class Settings:
         self.pop_length = int(self.length * (self.length - 1) / 2)
 
         # population size for each process
-        self.POP_SIZE = 600
+        self.POP_SIZE = 10
 
         # process number, i.e. the core number of the CPU
         self.N_CORES = 4
 
         self.DNA_SIZE = self.length
-        self.N_GENERATIONS = 100
+        self.N_GENERATIONS = 10
 
         # mutation and crossover rate range
         self.CROSSOVER_RATE = np.arange(0.5, 0.8, 0.02)

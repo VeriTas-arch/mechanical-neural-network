@@ -264,7 +264,7 @@ class HexaLattice:
 set = Settings()
 
 
-def pymunk_run(queue, process_num, popGame):
+def pymunk_run(queue, process_num, popGame, rate):
     """function that runs the pymunk simulation"""
 
     # initialize the parameters
@@ -273,10 +273,6 @@ def pymunk_run(queue, process_num, popGame):
     node_num = set.length
     N_GENERATIONS = set.N_GENERATIONS
     POP_SIZE = set.POP_SIZE
-
-    # randomly initialize the possibilities
-    crossover_rate = np.random.choice(set.CROSSOVER_RATE)
-    mutation_rate = np.random.choice(set.MUTATION_RATE)
 
     # initialize the population and the population's position
     pop = np.random.rand(POP_SIZE, node_num, node_num) * 25
@@ -319,7 +315,13 @@ def pymunk_run(queue, process_num, popGame):
         pop = EVA.select_parent(pop, fitness)
         popCopy = pop.copy()
         pop = [
-            EVA.process(popCopy, pop[popIndex], crossover_rate, mutation_rate, fitness)
+            EVA.process(
+                popCopy,
+                pop[popIndex],
+                rate[process_num][0],
+                rate[process_num][1],
+                fitness,
+            )
             for popIndex in range(POP_SIZE)
         ]
 
@@ -347,11 +349,9 @@ def pymunk_run(queue, process_num, popGame):
     )
     print(f"\nthe best fitness of EVA{process_num} is {result[0]}")
     print(
-        f"crossover rate{process_num}: {crossover_rate}, mutation rate{process_num}: {mutation_rate}"
+        f"crossover rate{process_num}: {rate[process_num][0]}, mutation rate{process_num}: {rate[process_num][1]}"
     )
     # queue.put(result)
-
-    plot.plot_fitness(crossover_rate, mutation_rate)
 
 
 if __name__ == "__main__":
@@ -361,6 +361,13 @@ if __name__ == "__main__":
     process_num = set.N_CORES
 
     init_stiffness = np.random.rand(node_num, node_num) * 20
+
+    # randomly initialize the possibilities
+    rate = [
+        (np.random.choice(set.CROSSOVER_RATE), np.random.choice(set.MUTATION_RATE))
+        for _ in range(process_num)
+    ]
+
     popGame = HexaLattice(init_stiffness)
     print("\nEvolution starts")
 
@@ -372,7 +379,7 @@ if __name__ == "__main__":
     process_list = []
 
     for i in range(process_num):
-        p = Process(target=pymunk_run, args=(queue, i, popGame))
+        p = Process(target=pymunk_run, args=(queue, i, popGame, rate))
         p.start()
         process_list.append(p)
 
@@ -381,6 +388,8 @@ if __name__ == "__main__":
 
     ed = time.time()
     print(f"\nEvolution ends, total time: {ed - st:.2f}s")
+
+    plot.plot_fitness(rate)
 
     # for i in range(process_num):
     # result = queue.get()

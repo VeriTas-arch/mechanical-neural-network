@@ -9,9 +9,16 @@ N_CORES = set.N_CORES
 N_GENERATIONS = set.N_GENERATIONS
 POP_SIZE = set.POP_SIZE
 
+crossover_default = np.ones(N_CORES) * 0.6
+mutation_default = np.ones(N_CORES) * 0.1
+rate_default = np.array([crossover_default, mutation_default])
 
-def plot_fitness(crossover_rate=0.6, mutation_rate=0.1):
+
+def plot_fitness(rate_default):
     for i in range(N_CORES):
+        crossover_rate = rate_default[i][0]
+        mutation_rate = rate_default[i][1]
+
         path = (
             Path(__file__).parent
             / "storage"
