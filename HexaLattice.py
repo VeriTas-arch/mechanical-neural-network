@@ -2,6 +2,8 @@ import pymunk
 import pymunk.pygame_util
 import math
 import EVA
+import time
+import plot
 
 import numpy as np
 
@@ -9,8 +11,7 @@ from settings import Settings
 from beam import Beam
 from node import Node
 from operations import Operations
-from tqdm import tqdm
-from time import sleep
+from multiprocessing import Process, Queue
 
 
 class HexaLattice:
@@ -46,7 +47,6 @@ class HexaLattice:
         # execution parameters
         self.stiffness_mat = stiffness_mat
         # self.step_counter = 0
-        # self.step_interval = 50
 
         # stability parameters
         self.max_v_1 = 0
@@ -83,14 +83,14 @@ class HexaLattice:
     def _update_screen(self):
         """Update the screen with force function"""
         # apply force to the nodes
-        body_1, body_2 = self.node_list[0], self.node_list[1]
-        (force_1_x, force_1_y) = self.settings.force_1
-        (force_2_x, force_2_y) = self.settings.force_2
-        self.operations.add_force(body_1, force_1_x, force_1_y)
-        self.operations.add_force(body_2, force_2_x, force_2_y)
+        body = [self.node_list[i] for i in range(self.row_lenh)]
+        (force_x, force_y) = self.settings.force_h
+
+        for i in range(self.row_lenh):
+            self.operations.add_force(body[i], force_x, force_y)
 
         # apply frictions
-        for i in range(0, self.settings.length):
+        for i in range(self.settings.length):
             v = math.sqrt(
                 self.node_list[i].velocity[0] ** 2 + self.node_list[i].velocity[1] ** 2
             )
@@ -261,51 +261,42 @@ class HexaLattice:
         self.running = True
 
 
-if __name__ == "__main__":
-    """define the EVA functions and initialize the parameters"""
-    set = Settings()
-    eva = EVA.Eva()
+set = Settings()
 
+
+def pymunk_run(queue, process_num, popGame, rate):
+    """function that runs the pymunk simulation"""
+
+    # initialize the parameters
+    max_fitness = 0
+    best_ind = None
     node_num = set.length
-    record_interval = set.record_interval
-    POP_SIZE = set.POP_SIZE
     N_GENERATIONS = set.N_GENERATIONS
-    max_fitness = eva.max_fitness
-    best_ind = eva.best_ind
+    POP_SIZE = set.POP_SIZE
 
-    resume = set.resume
-    record = set.record
-
-    """initialize the population and the population's position"""
-    pop = np.random.rand(POP_SIZE, node_num, node_num) * 20
+    # initialize the population and the population's position
+    pop = np.random.rand(POP_SIZE, node_num, node_num) * 25
     pop_pos = np.zeros((POP_SIZE, node_num, 2))
     fitness = np.zeros(POP_SIZE)
+    fit_data = np.zeros((N_GENERATIONS, 2))
 
-    """RESUME from the last generation"""
-    if resume:
-        stiffness_data = np.load(file="data.npy")
-        pop = stiffness_data
+    # detect_interval = int(N_GENERATIONS / 100)
 
-    init_stiffness = np.random.rand(node_num, node_num) * 20
-    popGame = HexaLattice(init_stiffness)
-    print("\nEvolution starts")
+    for gen in range(N_GENERATIONS):
 
-    """evolution process"""
-    for gen in tqdm(range(N_GENERATIONS), colour="red", desc="EVA", dynamic_ncols=True):
-
-        # calculate the fitness of the current generation
-        for i in tqdm(
-            range(POP_SIZE), colour="blue", desc="pymunk", dynamic_ncols=True
-        ):
+        for i in range(POP_SIZE):
             popGame._reset_game(pop[i])
             popGame.run_game()
 
             pop_pos[i] = [popGame.node_list[j].position for j in range(node_num)]
+            # print(pop_pos[index])
 
         # get the fitness of the population
         fitness = np.array(
             [ind_fitness for ind_fitness in map(EVA.get_fitness, pop_pos)]
         )
+
+        fit_data[gen] = [max(fitness), np.mean(fitness)]
 
         # sort the population based on fitness
         sort_fitness = np.argsort(fitness)
@@ -316,12 +307,23 @@ if __name__ == "__main__":
         if fitness[index] > max_fitness:
             max_fitness = fitness[index]
             best_ind = pop[index]
-            print(f"\nthe current best fitness is {max_fitness}")
+
+            if process_num == 0:
+                print(f"\nthe current best fitness is {max_fitness}")
 
         # chosse the parent based on fitness
         pop = EVA.select_parent(pop, fitness)
         popCopy = pop.copy()
-        pop = [EVA.process(popCopy, pop[popIndex]) for popIndex in range(POP_SIZE)]
+        pop = [
+            EVA.process(
+                popCopy,
+                pop[popIndex],
+                rate[process_num][0],
+                rate[process_num][1],
+                fitness,
+            )
+            for popIndex in range(POP_SIZE)
+        ]
 
         # create the new population
         fit_point = np.random.choice(POP_SIZE, p=sort_fitness / sum(sort_fitness))
@@ -329,14 +331,65 @@ if __name__ == "__main__":
             (pop[:fit_point], pop_fitness[fit_point:]), axis=None
         ).reshape(POP_SIZE, node_num, node_num)
 
-        # sleep(0.01)
+        if process_num == 0:
+            progress = gen / N_GENERATIONS * 100
+            print(f"\nEVA{process_num} is processing {progress:.2f}%")
 
-        """RECORD the last generation"""
-        if record and gen % record_interval == 0:
-            np.save(file="data.npy", arr=pop)
+    # save the result
+    result = (max_fitness, best_ind)
+    np.savetxt(
+        f"./storage/multiprocessing/individual{process_num}.csv",
+        result[1],
+        delimiter=",",
+    )
+    np.savetxt(
+        f"./storage/multiprocessing/fitness_data/fitness{process_num}.csv",
+        fit_data,
+        delimiter=",",
+    )
+    print(f"\nthe best fitness of EVA{process_num} is {result[0]}")
+    print(
+        f"crossover rate{process_num}: {rate[process_num][0]}, mutation rate{process_num}: {rate[process_num][1]}"
+    )
+    # queue.put(result)
 
-    # print the best individual
-    np.savetxt("individual.csv", best_ind, delimiter=",")
 
-    # print("Best individual: ", best_ind)
-    print(f"\nthe best fitness of this evolution is {max_fitness}")
+if __name__ == "__main__":
+    """initialize the population and the population's position"""
+    POP_SIZE = set.POP_SIZE
+    node_num = set.length
+    process_num = set.N_CORES
+
+    init_stiffness = np.random.rand(node_num, node_num) * 20
+
+    # randomly initialize the possibilities
+    rate = [
+        (np.random.choice(set.CROSSOVER_RATE), np.random.choice(set.MUTATION_RATE))
+        for _ in range(process_num)
+    ]
+
+    popGame = HexaLattice(init_stiffness)
+    print("\nEvolution starts")
+
+    queue = Queue()
+
+    st = time.time()
+
+    """evolution process"""
+    process_list = []
+
+    for i in range(process_num):
+        p = Process(target=pymunk_run, args=(queue, i, popGame, rate))
+        p.start()
+        process_list.append(p)
+
+    for p in process_list:
+        p.join()
+
+    ed = time.time()
+    print(f"\nEvolution ends, total time: {ed - st:.2f}s")
+
+    plot.plot_fitness(rate)
+
+    # for i in range(process_num):
+    # result = queue.get()
