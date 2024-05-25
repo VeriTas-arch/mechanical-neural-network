@@ -287,7 +287,6 @@ def pymunk_run(queue, process_num, popGame):
     # detect_interval = int(N_GENERATIONS / 100)
 
     for gen in range(N_GENERATIONS):
-
         for i in range(POP_SIZE):
             popGame._reset_game(pop[i])
             popGame.run_game()
@@ -312,14 +311,16 @@ def pymunk_run(queue, process_num, popGame):
             max_fitness = fitness[index]
             best_ind = pop[index]
 
-            if process_num == 0:
-                print(f"\nthe current best fitness is {max_fitness}")
+            print(
+                f"\nthe current best fitness is {max_fitness}"
+            ) if process_num == 0 else None
 
         # chosse the parent based on fitness
-        pop = EVA.select_parent(pop, fitness)
-        popCopy = pop.copy()
+        parent = EVA.select_parent(pop, fitness)
         pop = [
-            EVA.process(popCopy, pop[popIndex], crossover_rate, mutation_rate, fitness)
+            EVA.process(
+                parent, parent[popIndex], crossover_rate, mutation_rate, fitness
+            )
             for popIndex in range(POP_SIZE)
         ]
 
@@ -360,7 +361,7 @@ if __name__ == "__main__":
     node_num = set.length
     process_num = set.N_CORES
 
-    init_stiffness = np.random.rand(node_num, node_num) * 20
+    init_stiffness = np.random.rand(node_num, node_num) * 25
     popGame = HexaLattice(init_stiffness)
     print("\nEvolution starts")
 
