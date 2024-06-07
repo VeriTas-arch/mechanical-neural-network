@@ -1,17 +1,17 @@
-import pymunk
-import pymunk.pygame_util
 import math
-import EVA
 import time
-import plot
+from multiprocessing import Process, Queue
 
 import numpy as np
+import pymunk
+import pymunk.pygame_util
 
-from settings import Settings
+import EVA
+import plot
 from beam import Beam
 from node import Node
 from operations import Operations
-from multiprocessing import Process, Queue
+from settings import Settings
 
 
 class HexaLattice:
@@ -311,9 +311,11 @@ def pymunk_run(queue, process_num, popGame):
             max_fitness = fitness[index]
             best_ind = pop[index]
 
-            print(
-                f"\nthe current best fitness is {max_fitness}"
-            ) if process_num == 0 else None
+            (
+                print(f"\nthe current best fitness is {max_fitness}")
+                if process_num == 0
+                else None
+            )
 
         # chosse the parent based on fitness
         parent = EVA.select_parent(pop, fitness)
