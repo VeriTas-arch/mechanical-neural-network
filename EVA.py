@@ -3,8 +3,6 @@ import math
 import numpy as np
 from typing import Tuple
 
-set = Settings()
-
 
 class Eva:
     """class for Evolutionary Algorithm (EVA)"""
@@ -14,6 +12,7 @@ class Eva:
         self.best_ind = []
 
 
+set = Settings()
 node_num = set.length
 POP_SIZE = set.POP_SIZE
 DNA_SIZE = set.DNA_SIZE
@@ -21,10 +20,6 @@ MUTATION_RATE = set.MUTATION_RATE
 
 Array_Individual = np.ndarray[Tuple[int, int], np.float64]
 Array_Population = np.ndarray[Tuple[int, int, int], np.float64]
-
-
-def fillBits(size):
-    return 1 << size - 1
 
 
 def target_function():
@@ -107,7 +102,6 @@ def select_parent(
 
     Returns:
         Array_Population: The selected parent.
-
     """
 
     parent_index = np.random.choice(
