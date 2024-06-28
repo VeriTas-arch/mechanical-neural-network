@@ -97,7 +97,10 @@ def get_fitness(indPos):
     # fitness = rms_func(rms_out)
     # fitness = 1 / (math.exp(rms_out) + 1)
 
-    return max(1e-5, 100 - sum_output)
+    fitness = max(1e-5, 100 - sum_output)
+    # revised_fitness = math.exp(fitness / 100) * 100 / math.exp(1)
+
+    return fitness
 
 
 def select_parent(pop, fitness):
@@ -112,22 +115,46 @@ def select_parent(pop, fitness):
 def crossover(pop, parent, crossover_rate, fitness, type=0):
     """crossover the parents to generate offspring"""
     if np.random.rand() < crossover_rate:
+
+        # index = np.random.choice(POP_SIZE, p=fitness / sum(fitness))
+        # point = np.random.randint(1, DNA_SIZE - 1)
+
+        # if type == 0:
+        #     crossover_result = [
+        #         pop[index][i] if abs(i - point) < 2 else parent[i]
+        #         for i in range(node_num)
+        #     ]
+
+        # if type == 1:
+        #     crossover_result = [
+        #         np.concatenate((parent[i][:point], pop[index][i][point:]))
+        #         for i in range(node_num)
+        #     ]
+
+        # return crossover_result
+
+        temp = pop.copy()
+        point_num = int(DNA_SIZE / 10) + 1
+        point = np.random.choice(
+            np.arange(1, DNA_SIZE - 1), replace=False, size=point_num
+        )
         index = np.random.choice(POP_SIZE, p=fitness / sum(fitness))
-        point = np.random.randint(1, DNA_SIZE - 1)
 
-        if type == 0:
-            crossover_result = [
-                pop[index][i] if abs(i - point) < 2 else parent[i]
-                for i in range(node_num)
-            ]
+        for k in range(point_num):
 
-        if type == 1:
-            crossover_result = [
-                np.concatenate((parent[i][:point], pop[index][i][point:]))
-                for i in range(node_num)
-            ]
+            if type == 0:
+                temp = [
+                    temp[index][i] if abs(i - point[k]) < 2 else parent[i]
+                    for i in range(node_num)
+                ]
 
-        return crossover_result
+            if type == 1:
+                temp = [
+                    np.concatenate((parent[i][: point[k]], temp[index][i][point[k] :]))
+                    for i in range(node_num)
+                ]
+
+            return temp
 
     else:
         return parent
