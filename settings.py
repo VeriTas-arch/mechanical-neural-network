@@ -9,7 +9,7 @@ class Settings:
         # screen settings
         self.screen_width = 1280
         self.screen_height = 720
-        self.fps = 120
+        self.fps = 60
         self.bg_color = (230, 230, 230)
         self.gravity = (0, 0)
         self.step = 1
@@ -52,7 +52,7 @@ class Settings:
         self.POP_SIZE = 100
 
         # process number, i.e. the core number of the CPU
-        self.N_CORES = 6
+        self.N_CORES = 4
 
         self.DNA_SIZE = self.length
         self.N_GENERATIONS = 60
@@ -62,4 +62,5 @@ class Settings:
         self.MUTATION_RATE = np.arange(0.02, 0.12, 0.01)
 
         # stability analysis settings
-        self.stability_bias = 1e-3
+        self.stability_bias = 1e-2
+        self.stability_inf = 30
