@@ -1,6 +1,8 @@
-from settings import Settings
 import math
+
 import numpy as np
+
+from settings import Settings
 
 
 class Eva:
@@ -151,7 +153,7 @@ def crossover(
                     for i in range(node_num)
                 ]
 
-            return pending_pop
+            return np.array(pending_pop)
     else:
         return parent
 
@@ -169,7 +171,6 @@ def mutate(child: Array_Individual, mutation_rate: float) -> Array_Individual:
     """
 
     if np.random.rand() < mutation_rate:
-        # child = np.array(child)
         interval = np.max(child) - np.min(child)
         point = np.random.randint(0, DNA_SIZE)
 
