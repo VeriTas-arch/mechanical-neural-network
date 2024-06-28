@@ -96,9 +96,8 @@ def get_fitness(indPos):
     # rms_out = math.sqrt(sum_output / length)
     # fitness = rms_func(rms_out)
     # fitness = 1 / (math.exp(rms_out) + 1)
-    fitness = max(1e-5, 100 - sum_output)
 
-    return fitness
+    return max(1e-5, 100 - sum_output)
 
 
 def select_parent(pop, fitness):
@@ -106,9 +105,8 @@ def select_parent(pop, fitness):
     index = np.random.choice(
         POP_SIZE, size=POP_SIZE, replace=True, p=fitness / sum(fitness)
     )
-    temp = [pop[index[i]] for i in range(POP_SIZE)]
 
-    return temp
+    return [pop[index[i]] for i in range(POP_SIZE)]
 
 
 def crossover(pop, parent, crossover_rate, fitness, type=0):
