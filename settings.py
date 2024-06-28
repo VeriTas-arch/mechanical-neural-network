@@ -52,7 +52,7 @@ class Settings:
         self.POP_SIZE = 100
 
         # process number, i.e. the core number of the CPU
-        self.N_CORES = 4
+        self.N_CORES = 6
 
         self.DNA_SIZE = self.length
         self.N_GENERATIONS = 60
@@ -62,5 +62,5 @@ class Settings:
         self.MUTATION_RATE = np.arange(0.02, 0.12, 0.01)
 
         # stability analysis settings
-        self.stability_bias = 1e-2
+        self.stability_bias = 1e-3
         self.stability_inf = 30
