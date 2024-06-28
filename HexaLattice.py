@@ -327,7 +327,7 @@ def pymunk_run(queue, process_num, popGame, rate):
                 else None
             )
 
-        # chosse the parent based on fitness
+        # chosse the parent based on fitness, whose size is equal to that of the total pop
         parent = EVA.select_parent(pop, fitness)
         pop = [
             EVA.process(
@@ -370,7 +370,7 @@ def pymunk_run(queue, process_num, popGame, rate):
     # print(f"\nthe fitness time of EVA{process_num} is {fit_time:2f}s")
 
     time.sleep(1)
-    plot.plot_fitness(crossover_rate, mutation_rate)
+    plot.plot_fitness(rate)
 
 
 if __name__ == "__main__":

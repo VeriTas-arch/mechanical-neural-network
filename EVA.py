@@ -105,14 +105,14 @@ def get_fitness(indPos):
 
 def select_parent(pop, fitness):
     """choose the parent based on fitness"""
-    index = np.random.choice(
+    parent_index = np.random.choice(
         POP_SIZE, size=POP_SIZE, replace=True, p=fitness / sum(fitness)
     )
 
-    return [pop[index[i]] for i in range(POP_SIZE)]
+    return [pop[parent_index[i]] for i in range(POP_SIZE)]
 
 
-def crossover(pop, parent, crossover_rate, fitness, type=0):
+def crossover(pending_pop, parent, crossover_rate, fitness, type=0):
     """crossover the parents to generate offspring"""
     if np.random.rand() < crossover_rate:
 
@@ -138,23 +138,25 @@ def crossover(pop, parent, crossover_rate, fitness, type=0):
         point = np.random.choice(
             np.arange(1, DNA_SIZE - 1), replace=False, size=point_num
         )
-        index = np.random.choice(POP_SIZE, p=fitness / sum(fitness))
+        cross_index = np.random.choice(POP_SIZE, p=fitness / sum(fitness))
 
         for k in range(point_num):
 
             if type == 0:
-                pop = [
-                    pop[index][i] if abs(i - point[k]) < 2 else parent[i]
+                pending_pop = [
+                    pending_pop[cross_index][i] if abs(i - point[k]) < 2 else parent[i]
                     for i in range(node_num)
                 ]
 
             if type == 1:
-                pop = [
-                    np.concatenate((parent[i][: point[k]], pop[index][i][point[k] :]))
+                pending_pop = [
+                    np.concatenate(
+                        (parent[i][: point[k]], pending_pop[cross_index][i][point[k] :])
+                    )
                     for i in range(node_num)
                 ]
 
-            return pop
+            return pending_pop
 
     else:
         return parent
@@ -175,9 +177,9 @@ def mutate(child, mutation_rate):
     return child
 
 
-def process(pop, parent, crossover_rate, mutation_rate, fitness):
+def process(pending_pop, parent, crossover_rate, mutation_rate, fitness):
     """process the population with crossover and mutation"""
-    offspring = crossover(pop, parent, crossover_rate, fitness)
+    offspring = crossover(pending_pop, parent, crossover_rate, fitness)
     offspring = mutate(offspring, mutation_rate)
 
     return offspring
