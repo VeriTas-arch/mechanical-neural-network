@@ -11,7 +11,7 @@ class Beam:
         self.damping = self.settings.damping
         self.beam_length = self.settings.beam_length
 
-    def add_beam(self, body_1, body_2, stiffness=10):
+    def add_beam(self, body_1: pymunk.Body, body_2: pymunk.Body, stiffness=10):
         """fuction that adds a spring (i.e. beam)"""
         damping = self.damping
         beam_length = self.beam_length
