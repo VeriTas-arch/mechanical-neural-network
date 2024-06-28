@@ -1,7 +1,6 @@
 from settings import Settings
 import math
 import numpy as np
-from typing import Tuple
 
 
 class Eva:
@@ -17,8 +16,8 @@ node_num = set.length
 POP_SIZE = set.POP_SIZE
 DNA_SIZE = set.DNA_SIZE
 
-Array_Individual = np.ndarray[Tuple[int, int], np.float64]
-Array_Population = np.ndarray[Tuple[int, int, int], np.float64]
+Array_Individual = np.ndarray[tuple[int, int], np.float64]
+Array_Population = np.ndarray[tuple[int, int, int], np.float64]
 
 
 def target_function():

@@ -265,8 +265,19 @@ class HexaLattice:
 set = Settings()
 
 
-def pymunk_run(queue, process_num, popGame, rate):
-    """function that runs the pymunk simulation"""
+def pymunk_run(queue, process_num, popGame: HexaLattice, rate: tuple[float, float]):
+    """
+    Function that runs the pymunk simulation.
+
+    Args:
+        queue (Queue): A queue object for inter-process communication.
+        process_num (int): The process number.
+        popGame: The HexaLattice object.
+        rate: The operation rate, containing crossover and mutation rate.
+
+    Returns:
+        None
+    """
 
     # initialize the parameters
     max_fitness = 0
