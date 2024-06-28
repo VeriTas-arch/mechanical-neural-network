@@ -1,8 +1,6 @@
-import math
-
-import numpy as np
-
 from settings import Settings
+import math
+import numpy as np
 
 
 class Eva:

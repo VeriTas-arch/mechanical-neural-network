@@ -1,16 +1,16 @@
-import math
 import sys
 from pathlib import Path
 
-import EVA
 import numpy as np
 import pygame
 import pymunk
 import pymunk.pygame_util
+
+import EVA
 from beam import Beam
 from node import Node
 from operations import Operations
-from settings import Settings
+from pathlib import Path
 
 
 class HexaLattice:

@@ -1,8 +1,8 @@
-from pathlib import Path
-
 import matplotlib.pyplot as plt
 import numpy as np
 from settings import Settings
+
+from pathlib import Path
 
 set = Settings()
 N_CORES = set.N_CORES

@@ -1,14 +1,15 @@
-import math
-from pathlib import Path
-
-import EVA
-import matplotlib.pyplot as plt
-import numpy as np
 import pymunk
+import math
+import EVA
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+from settings import Settings
 from beam import Beam
 from node import Node
 from operations import Operations
-from settings import Settings
+from pathlib import Path
 
 
 class HexaLattice:
