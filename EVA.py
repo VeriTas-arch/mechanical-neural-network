@@ -158,7 +158,8 @@ def crossover(
 
 
 def mutate(child: Array_Individual, mutation_rate: float) -> Array_Individual:
-    """Mutation operator.
+    """
+    Mutation operator.
 
     Args:
         child (Array_Individual): The individual to be mutated.
