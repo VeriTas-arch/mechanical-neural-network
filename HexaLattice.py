@@ -265,7 +265,7 @@ class HexaLattice:
 set = Settings()
 
 
-def pymunk_run(queue, process_num, popGame):
+def pymunk_run(queue, process_num, popGame, rate):
     """function that runs the pymunk simulation"""
 
     # initialize the parameters
@@ -391,7 +391,7 @@ if __name__ == "__main__":
     process_list = []
 
     for i in range(process_num):
-        p = Process(target=pymunk_run, args=(queue, i, popGame))
+        p = Process(target=pymunk_run, args=(queue, i, popGame, rate))
         p.start()
         process_list.append(p)
 
