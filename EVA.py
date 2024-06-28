@@ -16,7 +16,6 @@ set = Settings()
 node_num = set.length
 POP_SIZE = set.POP_SIZE
 DNA_SIZE = set.DNA_SIZE
-MUTATION_RATE = set.MUTATION_RATE
 
 Array_Individual = np.ndarray[Tuple[int, int], np.float64]
 Array_Population = np.ndarray[Tuple[int, int, int], np.float64]
