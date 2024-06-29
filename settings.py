@@ -49,10 +49,10 @@ class Settings:
         self.pop_length = int(self.length * (self.length - 1) / 2)
 
         # population size for each process
-        self.POP_SIZE = 120
+        self.POP_SIZE = 100
 
         # process number, i.e. the core number of the CPU
-        self.N_CORES = 6
+        self.N_CORES = 4
 
         self.DNA_SIZE = self.length
         self.N_GENERATIONS = 60
