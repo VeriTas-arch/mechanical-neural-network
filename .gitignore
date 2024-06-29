@@ -9,3 +9,7 @@ test.ipynb
 /__pycache__
 /.vscode
 test.py
+HexaLattice.py
+EVA.py
+Step_trial.py
+Trial_Double.py

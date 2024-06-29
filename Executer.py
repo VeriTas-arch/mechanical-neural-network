@@ -2,12 +2,12 @@ import math
 import sys
 from pathlib import Path
 
+import EVA
 import numpy as np
+import plot
 import pygame
 import pymunk
 import pymunk.pygame_util
-
-import EVA
 from beam import Beam
 from node import Node
 from operations import Operations
@@ -31,6 +31,7 @@ class HexaLattice:
         self.space = pymunk.Space()
         self.space.gravity = self.settings.gravity
         self.draw_option = pymunk.pygame_util.DrawOptions(self.screen)
+        self.step = 450
 
         # initialize the objects from the external classes
         self.beam = Beam(self)
@@ -41,7 +42,9 @@ class HexaLattice:
         self.node_list = []
         self.beam_list = []
         self.init_pos = []
+        self.current_pos = []
         self.node_record = []
+        self.fit_data = []
 
         for i in range(self.settings.length):
             self.node_list.append(None)
@@ -71,6 +74,16 @@ class HexaLattice:
 
             self.space.step(self.settings.step)
             self.clock.tick(self.settings.fps)
+
+        """for i in range(self.step):
+            self._check_events()
+            self._update_screen()
+
+            self.current_pos = [self.node_list[j].position for j in range(self.settings.length)]
+            self.fit_data.append(EVA.get_fitness(self.current_pos))
+
+            self.space.step(self.settings.step)
+            self.clock.tick(self.settings.fps)"""
 
     def _check_events(self):
         """Respond to user input"""
@@ -215,7 +228,9 @@ class HexaLattice:
 
 if __name__ == "__main__":
     # read the stiffness matrix from the csv file
-    path = Path(__file__).parent / "storage" / "multiprocessing" / "individual1.csv"
+    path = (
+        Path(__file__).parent / "storage" / "multiprocessing" / "individual_trial.csv"
+    )
     stiffness_mat = np.loadtxt(open(path, "rb"), delimiter=",", skiprows=0)
     # print(stiffness_mat)
 

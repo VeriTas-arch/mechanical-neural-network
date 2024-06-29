@@ -1,11 +1,10 @@
 import math
 from pathlib import Path
 
+import EVA
 import matplotlib.pyplot as plt
 import numpy as np
 import pymunk
-
-import EVA
 from beam import Beam
 from node import Node
 from operations import Operations
