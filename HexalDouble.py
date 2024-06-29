@@ -2,11 +2,12 @@ import math
 import time
 from multiprocessing import Process, Queue
 
-import EVADouble
 import numpy as np
-import plot
 import pymunk
 import pymunk.pygame_util
+
+import EVADouble
+import plot
 from beam import Beam
 from node import Node
 from operations import Operations
@@ -45,6 +46,7 @@ class HexaLattice:
 
         # execution parameters
         self.stiffness_mat = stiffness_mat
+        self.step_counter = 0
 
         # stability parameters
         self.max_v_1 = 0
@@ -70,8 +72,9 @@ class HexaLattice:
 
     def run_game(self, force):
         """Main game loop"""
-        for _ in range(450):
+        for _ in range(600):
             self._update_screen(force)
+            self.step_counter += 1
             self.space.step(self.step)
 
     def _update_screen(self, force):
@@ -88,15 +91,15 @@ class HexaLattice:
             v = math.sqrt(
                 self.node_list[i].velocity[0] ** 2 + self.node_list[i].velocity[1] ** 2
             )
-            f = self.settings.friction
+            f = self.settings.friction + np.random.rand()
             F = math.sqrt(
                 self.node_list[i].force[0] ** 2 + self.node_list[i].force[1] ** 2
             )
 
-            if v >= 1e-2:
+            if v >= 1e-5:
                 e = self.node_list[i].velocity / v
                 friction_x, friction_y = -f * e[0], -f * e[1]
-            elif v < 1e-2 and F < f:
+            elif v < 1e-5 and F < f:
                 friction_x, friction_y = (
                     -self.node_list[i].force[0],
                     -self.node_list[i].force[1],
@@ -239,11 +242,15 @@ class HexaLattice:
         self.max_v_1 = max(v_1, self.max_v_1)
         self.max_v_2 = max(v_2, self.max_v_2)
 
-        if self.max_v_1 > 0.3 or self.max_v_2 > 0.3:
-            if v_1 <= threshold and v_2 <= threshold:
-                self.running = False
-                self.max_v_1 = 0
-                self.max_v_2 = 0
+        print(v_1, v_2)
+        print(self.max_v_1, self.max_v_2)
+
+        if min(self.max_v_1, self.max_v_2) > 1e-4 and max(v_1, v_2) < threshold:
+            self.running = False
+            self.max_v_1 = 0
+            self.max_v_2 = 0
+
+            print(self.step_counter)
 
     def _reset_game(self, stiffness_mat):
         """reset the game"""
@@ -253,12 +260,13 @@ class HexaLattice:
         self._create_beams(stiffness_mat)
 
         self.running = True
+        self.step_counter = 0
 
 
 set = Settings()
 
 
-def pymunk_run(queue, process_num, popGame):
+def pymunk_run(queue, process_num, popGame, rate):
     """function that runs the pymunk simulation"""
 
     # initialize the parameters
@@ -319,11 +327,10 @@ def pymunk_run(queue, process_num, popGame):
                 print(f"\nthe current best fitness is {max_fitness}")
 
         # chosse the parent based on fitness
-        pop = EVADouble.select_parent(pop, fitness)
-        popCopy = pop.copy()
+        parent = EVADouble.select_parent(pop, fitness)
         pop = [
             EVADouble.process(
-                popCopy, pop[popIndex], crossover_rate, mutation_rate, fitness
+                parent, parent[popIndex], crossover_rate, mutation_rate, fitness
             )
             for popIndex in range(POP_SIZE)
         ]
@@ -352,12 +359,12 @@ def pymunk_run(queue, process_num, popGame):
     )
     print(f"\nthe best fitness of EVADouble{process_num} is {result[0]}")
     print(
-        f"crossover rate{process_num}: {crossover_rate}, mutation rate{process_num}: {mutation_rate}"
+        f"crossover rate{process_num}: {crossover_rate:.2f}, mutation rate{process_num}: {mutation_rate:.2f}"
     )
     # queue.put(result)
 
-    time.sleep(2)
-    plot.plot_fitness(crossover_rate, mutation_rate)
+    time.sleep(1)
+    plot.plot_fitness(rate)
 
 
 if __name__ == "__main__":
@@ -366,7 +373,13 @@ if __name__ == "__main__":
     node_num = set.length
     process_num = set.N_CORES
 
-    init_stiffness = np.random.rand(node_num, node_num) * 20
+    init_stiffness = np.random.rand(node_num, node_num) * 25
+    # randomly initialize the possibilities
+    rate = [
+        (np.random.choice(set.CROSSOVER_RATE), np.random.choice(set.MUTATION_RATE))
+        for _ in range(process_num)
+    ]
+
     popGame = HexaLattice(init_stiffness)
     print("\nEvolution starts")
 
@@ -378,7 +391,7 @@ if __name__ == "__main__":
     process_list = []
 
     for i in range(process_num):
-        p = Process(target=pymunk_run, args=(queue, i, popGame))
+        p = Process(target=pymunk_run, args=(queue, i, popGame, rate))
         p.start()
         process_list.append(p)
 

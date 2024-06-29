@@ -2,6 +2,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+
 from settings import Settings
 
 set = Settings()
@@ -9,9 +10,16 @@ N_CORES = set.N_CORES
 N_GENERATIONS = set.N_GENERATIONS
 POP_SIZE = set.POP_SIZE
 
+crossover_default = np.ones(N_CORES) * 0.6
+mutation_default = np.ones(N_CORES) * 0.1
+rate_default = np.array([crossover_default, mutation_default])
 
-def plot_fitness(crossover_rate=0.6, mutation_rate=0.1):
+
+def plot_fitness(rate_default):
     for i in range(N_CORES):
+        crossover_rate = rate_default[i][0]
+        mutation_rate = rate_default[i][1]
+
         path = (
             Path(__file__).parent
             / "storage"
@@ -53,8 +61,10 @@ def plot_fitness(crossover_rate=0.6, mutation_rate=0.1):
         plt.ylabel("Fitness")
         plt.title(f"crossover: {crossover_rate:.2f}, mutation: {mutation_rate:.2f}")
 
+        len_fit_data = len(fit_data)
+
         ax2.scatter(
-            np.arange(len(fit_data)),
+            np.arange(len_fit_data),
             fit_data[:, 0],
             c="r",
             alpha=1,
@@ -62,7 +72,7 @@ def plot_fitness(crossover_rate=0.6, mutation_rate=0.1):
             label="max fitness",
         )
         ax2.scatter(
-            np.arange(len(fit_data)),
+            np.arange(len_fit_data),
             fit_data[:, 1],
             c="b",
             alpha=1,
@@ -80,25 +90,3 @@ def plot_fitness(crossover_rate=0.6, mutation_rate=0.1):
             / f"fitness{i}_2.png"
         )
         fig2.savefig(path2)
-
-
-def fitness_change(fit_data, step):
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-
-    plt.xlabel("Steps")
-    plt.ylabel("Fitness")
-    plt.title(f"Step: {step}")
-
-    ax.plot(fit_data[:], linewidth=2)
-
-    # plt.legend(loc="lower right")
-
-    path = (
-        Path(__file__).parent
-        / "storage"
-        / "multiprocessing"
-        / "figures"
-        / f"fitness_change_{step}steps.png"
-    )
-    fig.savefig(path)

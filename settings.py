@@ -9,17 +9,17 @@ class Settings:
     def __init__(self):
         """initilize the settings of the stimulation environment"""
         # screen settings
-        self.screen_width = 1280
-        self.screen_height = 720
-        self.fps = 60
+        self.screen_width = 1920
+        self.screen_height = 1080
+        self.fps = 120
         self.bg_color = (230, 230, 230)
         self.gravity = (0, 0)
         self.step = 1
 
         # the number of the first row
-        self.row_lenh = 6
+        self.row_lenh = 8
         # the number of the first column
-        self.col_lenh = 6
+        self.col_lenh = 8
         # the number of the rows
         self.row_num = 2 * self.col_lenh + 1
         # the length of the node list
@@ -33,7 +33,7 @@ class Settings:
 
         # beam settings
         self.damping = 20
-        self.friction = 1
+        self.friction = 2
         self.beam_length = 50
 
         # node settings
@@ -62,14 +62,15 @@ class Settings:
 
         # single training settings
         self.Amp = self.beam_length / 30
-        self.force_h = (7, 7)
+        self.force_amp = 20
+        self.force_h = (self.force_amp, self.force_amp)
 
         # double-force-phase training settings
-        self.force_1 = (7, 7)
+        self.force_1 = (self.force_amp, self.force_amp)
         self.phase_1 = 0
-        self.force_2 = (-7, 7)
+        self.force_2 = (self.force_amp, self.force_amp)
         self.phase_2 = math.pi
 
         # stability analysis settings
-        self.stability_bias = 1e-2
+        self.stability_bias = 1e-3
         self.stability_inf = 30
