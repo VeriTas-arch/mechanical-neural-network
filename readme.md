@@ -17,7 +17,7 @@
 
 #### Main Class
 
-+ The `HexaLattice.py` works as the main part. In this file the simulation function `pymunk_run` is executed, which means the genetic algorithm is introduced.
++ The `HexaLattice.py` works as the main part. In this file the simulation function `pymunk_run()` is executed, which means the genetic algorithm is introduced.
 
 #### Genetic Algorithm
 
