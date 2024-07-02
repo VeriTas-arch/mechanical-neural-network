@@ -3,7 +3,7 @@
 ## Instructions
 
 + This is the simulation for Mechanical Neural Network (MNN) based on Pymunk.
-+ In our simulation, a spring-mass system is applied to simplify the representation of Mechanical Neural Network, yet some properties may be lost in this procedure compared to the original version.
++ In our simulation, a spring-mass system is applied to simplify the representation of Mechanical Neural Network, yet some properties may get lost in this procedure compared to the original version.
 
 ### File Structure
 
@@ -17,7 +17,7 @@
 
 #### Main Class
 
-+ The `HexaLattice.py` works as the main part. In this file the simulation function `pymunk_run()` is executed, which means the genetic algorithm is introduced.
++ The `HexaLattice.py` works as the main part. In this file the simulation function `pymunk_run()` is executed, where the genetic algorithm is introduced.
 
 #### Genetic Algorithm
 
@@ -30,7 +30,7 @@
 #### Supporting Classes
 
 + In this section, some supporting classes are introduced.
-+ `beam.py` is responsible for the creation of flexible-stiffness beams, while node.py is reponsible for the creation of the static and float nodes.
++ `beam.py` is responsible for the creation of flexible-stiffness beams, while `node.py` is reponsible for the creation of the static and float nodes.
 + `operations.py` contains all the external operations that are implemented in this MNN simulation, such as external force, and drawing arrows that represent the displacement.
 + In `settings.py` you can set the environment properties of the simulation, for example the screen size.
 
