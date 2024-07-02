@@ -17,27 +17,27 @@
 
 #### Main Class
 
-+ The HexaLattice.py works as the main part. In this file the simulation function is executed, which means the genetic algorithm is introduced.
++ The `HexaLattice.py` works as the main part. In this file the simulation function `pymunk_run` is executed, which means the genetic algorithm is introduced.
 
 #### Genetic Algorithm
 
 + These files are relative to the execution of genetic algorithm.
-+ EVA.py includes functions that are needed in the training process. Note that the crossover function now includes two types, but the second one is nearly abandoned (which was inherited from older versions, yet proved inefficient) .
-+ plot.py includes a function that uses the training results to draw the fitness-generation pictures.
-+ Executer.py is used to check out the best individual got from the genetic algorithm. It is shown in the pygame window, while the training process is now invisble by removing the pygame class.
-+ Filter.py is used to plot the fitness curve of a given induvidual. Thus the convergence simulation step can be estimated.
++ `EVA.py` includes functions that are needed in the training process. Note that the crossover function now includes two types, but the second one is nearly abandoned (which was inherited from older versions, yet proved inefficient) .
++ `plot.py` includes a function that uses the training results to draw the fitness-generation pictures.
++ `Executer.py` is used to check out the best individual got from the genetic algorithm. It is shown in the pygame window, while the training process is now invisble by removing the pygame class.
++ `Filter.py` is used to plot the fitness curve of a given induvidual. Thus the convergence simulation step can be estimated.
 
 #### Supporting Classes
 
 + In this section, some supporting classes are introduced.
-+ beam.py is responsible for the creation of flexible-stiffness beams, while node.py is reponsible for the creation of the static and float nodes.
-+ operations.py contains all the external operations that are implemented in this MNN simulation, such as external force, and drawing arrows that represent the displacement.
-+ In settings.py you can set the environment properties of the simulation, for example the screen size.
++ `beam.py` is responsible for the creation of flexible-stiffness beams, while node.py is reponsible for the creation of the static and float nodes.
++ `operations.py` contains all the external operations that are implemented in this MNN simulation, such as external force, and drawing arrows that represent the displacement.
++ In `settings.py` you can set the environment properties of the simulation, for example the screen size.
 
 ### Things to Take Care
 
-+ If the number of nodes is too large that they overflow, you can try to configure the node radius and the beam length in settings.py.
-+ Most parameters can be configured in settings.py, thus you may check out this file if you want to reset any parameter.
++ If the number of nodes is too large that they overflow, you can try to configure the node radius and the beam length in `settings.py`.
++ Most parameters can be configured in `settings.py`, thus you may check out this file if you want to reset any parameter.
 + Currently the genetic algorithm has some problems that to large extent influence the result. It is yet unknown to us whether such problem results from the algorithm or the network structure itself. However, with large population size the problem can be alleviated, which is not crresponding to the discussion below yet has successfully sovled this seemingly principle problem under certain conditions. Therefrore you may ingnore this section for now while keeping it in mind as a deep dive into the algorithm.
 
 ## Genetic Algorithm and Related
