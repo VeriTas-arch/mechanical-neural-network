@@ -66,8 +66,8 @@ class Settings:
         # stability analysis settings
         self.stability_bias = 1e-3
         self.stability_inf = 30
-        
+
         # file path
         self.workspace_path = Path(__file__).parent.parent
-        self.pic_path = self.workspace_path / 'assets' / 'figures'
-        self.data_path = self.workspace_path / 'assets' / 'fitness_data'
+        self.pic_path = self.workspace_path / "assets" / "figures"
+        self.data_path = self.workspace_path / "assets" / "fitness_data"

@@ -362,12 +362,12 @@ def pymunk_run(queue, process_num, popGame: HexaLattice, rate: tuple[float, floa
     # save the result
     result = (max_fitness, best_ind)
     np.savetxt(
-        set.workspace_path/'assets'/f"individual{process_num}.csv",
+        set.workspace_path / "assets" / f"individual{process_num}.csv",
         result[1],
         delimiter=",",
     )
     np.savetxt(
-        set.data_path/f"fitness{process_num}.csv",
+        set.data_path / f"fitness{process_num}.csv",
         fit_data,
         delimiter=",",
     )

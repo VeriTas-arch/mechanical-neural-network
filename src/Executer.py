@@ -215,7 +215,7 @@ class HexaLattice:
 if __name__ == "__main__":
     # read the stiffness matrix from the csv file
     set = Settings()
-    path = set.workspace_path / 'assets' / 'individual1.csv'
+    path = set.workspace_path / "assets" / "individual1.csv"
     stiffness_mat = np.loadtxt(open(path, "rb"), delimiter=",", skiprows=0)
     # print(stiffness_mat)
 
