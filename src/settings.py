@@ -68,6 +68,6 @@ class Settings:
         self.stability_inf = 30
         
         # file path
-        self.workspace_path = Path(__file__).parent
+        self.workspace_path = Path(__file__).parent.parent
         self.pic_path = self.workspace_path / 'assets' / 'figures'
         self.data_path = self.workspace_path / 'assets' / 'fitness_data'

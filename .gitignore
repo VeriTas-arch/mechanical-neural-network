@@ -6,6 +6,6 @@ test.py
 test.ipynb
 /assets
 *.csv
-/__pycache__
+*/__pycache__
 /.vscode
 test.py
