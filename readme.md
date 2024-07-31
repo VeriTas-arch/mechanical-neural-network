@@ -9,10 +9,16 @@
 
 ```shell
 .
-├── HexaLattice.py
-├── EVA.py, plot.py
-├── node.py, beam.py, operations.py 
-└── settings.py
+├── src
+│   ├── HexaLattice.py
+│   ├── EVA.py, plot.py
+│   ├── node.py, beam.py, operations.py 
+│   └── settings.py
+├── assets
+│   ├── figures
+│   └── fitness_data
+├── .gitignore
+└── README.md
 ```
 
 #### Main Class
