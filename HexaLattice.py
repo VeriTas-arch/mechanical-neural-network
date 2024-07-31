@@ -57,9 +57,9 @@ class HexaLattice:
         self.beam_index = np.zeros((self.length, self.length))
 
         # self.dynamic_pos = [None for i in range(self.length)]
-        self.init_pos = [None for i in range(self.length)]
-        self.node_record = [None for i in range(self.length)]
-        self.node_list = [None for i in range(self.length)]
+        self.init_pos = [None for _ in range(self.length)]
+        self.node_record = [None for _ in range(self.length)]
+        self.node_list = [None for _ in range(self.length)]
         self.beam_list = [
             [None for j in range(self.length)] for i in range(self.length)
         ]
@@ -76,7 +76,7 @@ class HexaLattice:
         """Main game loop"""
         for _ in range(300):
             self._update_screen()
-            self._check_stability(self.settings.stability_bias)
+            # self._check_stability(self.settings.stability_bias)
             self.step_counter += 1
             self.space.step(self.step)
 
@@ -302,7 +302,6 @@ def pymunk_run(queue, process_num, popGame: HexaLattice, rate: tuple[float, floa
     # detect_interval = int(N_GENERATIONS / 100)
 
     for gen in range(N_GENERATIONS):
-
         # t1 = time.time()
 
         for i in range(POP_SIZE):
