@@ -1,5 +1,7 @@
 import numpy as np
 
+from pathlib import Path
+
 
 class Settings:
     """class to store the settings of the stimulation environment"""
@@ -64,3 +66,8 @@ class Settings:
         # stability analysis settings
         self.stability_bias = 1e-3
         self.stability_inf = 30
+        
+        # file path
+        self.workspace_path = Path(__file__).parent
+        self.pic_path = self.workspace_path / 'assets' / 'figures'
+        self.data_path = self.workspace_path / 'assets' / 'fitness_data'
