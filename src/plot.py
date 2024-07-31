@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -20,13 +18,7 @@ def plot_fitness(rate_default):
         crossover_rate = rate_default[i][0]
         mutation_rate = rate_default[i][1]
 
-        path = (
-            Path(__file__).parent
-            / "storage"
-            / "multiprocessing"
-            / "fitness_data"
-            / f"fitness{i}.csv"
-        )
+        path = set.data_path / f"fitness{i}.csv"
         fit_data = np.loadtxt(open(path, "rb"), delimiter=",", skiprows=0)
 
         fig1 = plt.figure()
@@ -43,13 +35,7 @@ def plot_fitness(rate_default):
 
         plt.legend(loc="lower right")
 
-        path1 = (
-            Path(__file__).parent
-            / "storage"
-            / "multiprocessing"
-            / "figures"
-            / f"fitness{i}_1.png"
-        )
+        path1 = set.pic_path / f"fitness{i}_1.png"
         fig1.savefig(path1)
 
         fig2 = plt.figure()
@@ -82,11 +68,5 @@ def plot_fitness(rate_default):
 
         plt.legend(loc="lower right")
 
-        path2 = (
-            Path(__file__).parent
-            / "storage"
-            / "multiprocessing"
-            / "figures"
-            / f"fitness{i}_2.png"
-        )
+        path2 = set.pic_path / f"fitness{i}_2.png"
         fig2.savefig(path2)
