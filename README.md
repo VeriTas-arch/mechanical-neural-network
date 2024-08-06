@@ -12,7 +12,7 @@
 ├── src
 │   ├── HexaLattice.py
 │   ├── EVA.py, plot.py
-│   ├── node.py, beam.py, operations.py 
+│   ├── node.py, beam.py, operations.py
 │   └── settings.py
 ├── assets
 │   ├── figures
