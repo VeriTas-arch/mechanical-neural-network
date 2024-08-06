@@ -4,7 +4,6 @@ from multiprocessing import Process, Queue
 
 import numpy as np
 import pymunk
-import pymunk.pygame_util
 
 import EVA
 import plot

@@ -1,5 +1,4 @@
 import pymunk
-import pymunk.pygame_util
 
 
 class Beam:

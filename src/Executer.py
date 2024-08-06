@@ -4,7 +4,6 @@ import sys
 import numpy as np
 import pygame
 import pymunk
-import pymunk.pygame_util
 
 import EVA
 from beam import Beam
