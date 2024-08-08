@@ -14,7 +14,7 @@ class Settings:
         self.fps = 120
         self.bg_color = (230, 230, 230)
         self.gravity = (0, 0)
-        self.step = 1
+        self.step = 0.5
 
         # the number of the first row
         self.row_lenh = 2
